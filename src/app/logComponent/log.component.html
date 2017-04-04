@@ -1,0 +1,19 @@
+<div class="player-box">
+    <h3 class="box-title" ng-transclude="boxTitleHtml">
+        <i class="fa fa-list"></i> Log
+        <i class="pull-right fa" ngClass="{{pauseScroll ? 'fa-play' : 'fa-pause'}}" (click)="pauseScroll=!pauseScroll" title="Autoscroll On/Off"></i>
+    </h3>
+    <div class="player-content">
+        <div class="log-component">
+            <ul class="list-group">
+                <li *ngFor="let item of _logService.messages" ngClass="{{getLogClass(item.type)}}">
+                    [<span>{{item.timestamp|date:'MM/dd HH:mm:ss'}}</span>]&nbsp;
+                    <span>{{item.message}}</span>
+                </li>
+                <li ngShow="scrolling">
+                    <a id="scrollBottom"></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

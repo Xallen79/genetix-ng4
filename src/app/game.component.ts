@@ -1,0 +1,30 @@
+import { Component } from '@angular/core';
+import { Hive } from './classes/hive.class';
+import * as Bee from './classes/bee.class';
+import { GameService } from './game.service';
+import { LogService } from 'app/logComponent/log.component';
+import { Subscription } from "rxjs/Subscription";
+
+@Component({
+
+  templateUrl: './game.component.html',
+  styleUrls: ['./game.component.scss']
+})
+export class GameComponent {
+  hives: Hive[];
+  title = 'GenetixNg4';
+  count: number = 0;
+  gameLoopSub: Subscription;
+  constructor(private _gameService: GameService, private _logService: LogService) {
+  }
+  ngOnInit() {
+    this.hives = this._gameService.getHives();
+    this.gameLoopSub = this._gameService.gameLoopEvent$.subscribe(elapsedMs => {
+      while (elapsedMs > 0) { this.count++; elapsedMs -= 1000; if (this.count % 10 === 0) this._logService.logGeneralMessage("Test"); }
+    });
+  }
+
+  ngOnDestroy() {
+    this.gameLoopSub.unsubscribe();
+  }
+}

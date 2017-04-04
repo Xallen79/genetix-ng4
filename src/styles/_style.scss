@@ -1,0 +1,693 @@
+$top-row-height: 25vh;
+@mixin strokeme($color) {
+    text-shadow: -1px -1px 0 $color, 1px -1px 0 $color, -1px 1px 0 $color, 1px 1px 0 $color;
+}
+
+@mixin gradient {
+    //background: $gray-light;
+    background: opacify($gray-light, 0.4);
+    background: -moz-linear-gradient(-45deg, opacify($gray-light, 0.4) 0%, opacify($gray-dark, 0.4) 30%, opacify($gray-dark, 0.4) 100%);
+    background: -webkit-gradient(left top, right bottom, color-stop(0%, opacify($gray-light, 0.4)), color-stop(30%, opacify($gray-dark, 0.4)), color-stop(100%, opacify($gray-dark, 0.4)));
+    background: -webkit-linear-gradient(-45deg, opacify($gray-light, 0.4) 0%, opacify($gray-light, 0.4) 30%, opacify($gray-dark, 0.4) 100%);
+}
+
+@mixin resource-attr-stroke {
+    [data-attr="STR"] {
+        color: $attr-str-dim;
+        @include strokeme($attr-str)
+    }
+    [data-attr="INT"] {
+        color: $attr-int-dim;
+        @include strokeme($attr-int)
+    }
+    [data-attr="END"] {
+        color: $attr-end-dim;
+        @include strokeme($attr-end)
+    }
+    [data-attr="CHR"] {
+        color: $attr-chr-dim;
+        @include strokeme($attr-chr)
+    }
+    [data-attr="LCK"] {
+        color: $attr-lck-dim;
+        @include strokeme($attr-lck)
+    }
+}
+
+i.text-success {
+    color: $attr-str;
+    @include strokeme($brand-success-dark)
+}
+
+i.text-danger {
+    color: $brand-danger;
+    @include strokeme($brand-danger-dark)
+}
+
+@mixin maximize-row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    [class*="col-"] {
+        padding-left: .25vh !important;
+        padding-right: .25vh !important;
+    }
+    [class*="col-"].nopadding {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
+
+/// Test if `$value` is a valid direction
+/// @param {*} $value - Value to test
+/// @return {Bool}
+@function is-direction($value) {
+    $is-keyword: index((to top, to top right, to right top, to right, to bottom right, to right bottom, to bottom, to bottom left, to left bottom, to left, to left top, to top left), $value);
+    $is-angle: type-of($value)=='number' and index('deg' 'grad' 'turn' 'rad', unit($value));
+    @return $is-keyword or $is-angle;
+}
+
+@mixin linear-gradient($direction, $color-stops...) {
+    // Direction has been omitted and happens to be a color-stop
+    @if is-direction($direction)==false {
+        $color-stops: $direction, $color-stops;
+        $direction: 180deg;
+    }
+    background: nth(nth($color-stops, 1), 1);
+    background: -webkit-linear-gradient(legacy-direction($direction), $color-stops);
+    background: linear-gradient($direction, $color-stops);
+}
+
+html {
+    @include maximize-row();
+}
+
+body {
+    overflow: hidden;
+}
+
+h4 {
+    font-size: 1.1vw;
+}
+
+h5 {
+    font-size: .85vw;
+}
+
+#content {
+    height: 100vh;
+}
+
+#inner-content {
+    padding: 0.5vw 0.5vh;
+    //border: 2px solid $brand-info;
+    height: calc(100vh - #{$navbar-height});
+    //height: 90vh;
+}
+
+.game-menu {
+    max-height: $navbar-height;
+}
+
+.scalable-list-button {
+    float: left;
+    width: 30%;
+    margin: .1vh .1vw .1vh .1vw;
+    button {
+        font-size: .8vw;
+        width: 100%;
+        margin: 0;
+    }
+}
+
+.scalable-list-button-big {
+    float: left;
+    width: 45%;
+    margin: .1vh .1vw .1vh .1vw;
+    button {
+        font-size: .8vw;
+        width: 100%;
+        margin: 0;
+    }
+}
+
+.tab-list-button {
+    float: left;
+    width: 10vw;
+    margin: .1vh .1vw .1vh .1vw;
+    button {
+        font-size: .8vw;
+        width: 100%;
+        margin: 0;
+        color: $gray-light;
+        background-color: rgba(0, 0, 0, .3);
+    }
+    button:hover {
+        @include linear-gradient(180deg, lighten($brand-primary, 30%) 0%, lighten($brand-primary, 10%) 30%, lighten($brand-primary, 10%) 100%);
+    }
+}
+
+.tab-list-button.active {
+    button {
+        color: $gray-lighter;
+        @include linear-gradient(180deg, lighten($brand-primary, 20%) 0%, $brand-primary 30%, $brand-primary 100%);
+    }
+}
+
+.topRow {
+    height: $top-row-height;
+    margin-bottom: .5vh;
+}
+
+.genomeEditor {
+    font-size: .7vw;
+    img.gene {
+        border: .1vh solid black;
+    }
+    input {
+        color: black;
+        width: 2vw;
+    }
+}
+
+.resource-list {
+    @include maximize-row();
+    //overflow-y: scroll;
+    //height: 30vh;
+    h5 {
+        margin: 8px 0px 1px 0px;
+        font-size: .8vw;
+    }
+}
+
+.trait-filter-item {
+    color: white;
+    border: 1px solid $gray-light;
+    margin-right: 3px;
+    float: left;
+    @include linear-gradient(180deg, $gray-dark 15%, black 100%);
+    button {
+        margin-left: 3px;
+    }
+}
+
+.population-list {
+    .mortal-name {
+        @include resource-attr-stroke();
+        font-size: .8vw;
+        padding: 3px;
+    }
+    .mortal-genome {
+        padding: 3px;
+        .genomeEditor {
+            width: 10vw;
+        }
+    }
+    @include maximize-row();
+}
+
+bloqhead-population-list {
+    .nav-pills>li>a {
+        /* adjust padding for height*/
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
+}
+
+bloqhead-population-panel {
+    thead {
+        th {
+            text-align: center;
+            font-size: .5vw;
+        }
+    }
+    tbody {
+        td {
+            font-size: .6vw;
+        }
+    }
+}
+
+.progress-trait-selector {
+    margin: 0;
+    border: 1px solid black;
+    max-width: 6vw;
+    height: 1.2vh;
+    //background-color: white;
+    table.genes {
+        height: 25vh;
+        font-size: .4vw;
+    }
+    .progress-bar {
+        -webkit-transition: width 0.6s ease, margin-left 0.6s ease;
+        -moz-transition: width 0.6s ease, margin-left 0.6s ease;
+        -ms-transition: width 0.6s ease, margin-left 0.6s ease;
+        -o-transition: width 0.6s ease, margin-left 0.6s ease;
+        transition: width 0.6s ease, margin-left 0.6s ease;
+    }
+}
+
+.toggle.lock {
+    .toggle-handle {
+        background-color: white;
+    }
+}
+
+div.genes-table {
+    display: table;
+    min-width: 15vw;
+}
+
+div.genes-tr {
+    //display: table-row;
+    height: 1.4vh;
+    min-width: 20vw;
+}
+
+div.genes-th,
+div.genes-td {
+    display: table-cell;
+    overflow: hidden;
+    text-align: center;
+    min-width: 6vw;
+    white-space: nowrap;
+    font-size: .7vw;
+    margin: 1px;
+}
+
+div.genes-th {
+    //display: table-row;
+    font-size: .75vw;
+    font-weight: bold;
+    display: table-cell;
+    line-height: .95;
+    color: lightblue;
+    height: 100%;
+}
+
+div.genes-th.dom,
+div.genes-td.dom {
+    text-align: left;
+    padding-left: 5px;
+}
+
+div.genes-th.rec,
+div.genes-td.rec {
+    text-align: right;
+    padding-right: 5px;
+}
+
+table.genomeEditor {
+    //margin-top: .1vh;
+    //margin-bottom: .1vh;
+    margin: 0;
+    width: 100%;
+    tbody {
+        td {
+            background-color: black;
+            font-family: "Courier New", Courier, monospace;
+            text-align: center;
+        }
+        td:nth-child(1) {
+            @include linear-gradient(180deg, $attr-str 15%, black 100%)
+        }
+        td:nth-child(2) {
+            @include linear-gradient(180deg, $attr-int 15%, black 100%)
+        }
+        td:nth-child(3) {
+            @include linear-gradient(180deg, $attr-end 15%, black 100%)
+        }
+        td:nth-child(4) {
+            @include linear-gradient(180deg, $attr-chr 15%, black 100%)
+        }
+        td:nth-child(5) {
+            @include linear-gradient(180deg, $attr-lck 15%, black 100%)
+        }
+    }
+    img {
+        min-width: 100%;
+    }
+}
+
+.trait-tooltip,
+.perk-tooltip,
+.achievement-tooltip,
+.building-tooltip {
+    p {
+        margin: 3px;
+    }
+    @include resource-attr-stroke();
+    h5 {
+        margin: 3px;
+        color: lightblue;
+    }
+    div {
+        max-width: 40vw;
+    }
+}
+
+.achievement-container {
+    height: calc(100vh - 3.5vh - #{$navbar-height} - 18px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.achievement-list {
+    margin: 5px;
+    padding: 2px;
+    //border: 1px solid black;
+    //background-color: $gray;
+    .achievement-rank-row {
+        @include maximize-row();
+    }
+    .achievement-cell,
+    .achievement-rank-cell {
+        border: 1px solid black;
+        padding: 2px;
+        min-height: 30px;
+        font-size: .75vw;
+    }
+    .achievement-cell {
+        @include linear-gradient(180deg, $gray-dark 15%, black 100%);
+        padding: 5px;
+        margin: 2px;
+    }
+    .achievement-rank-cell {
+        line-height: 1.1vw;
+        padding: 2px;
+        margin-bottom: 3px;
+        @include linear-gradient(135deg, $gray-light 0%, $gray-dark 30%, $gray-dark 100%);
+        text-align: center;
+    }
+    .achievement-rank-STR {
+        @include linear-gradient(180deg, $attr-str 15%, black 100%)
+    }
+    .achievement-rank-INT {
+        @include linear-gradient(180deg, $attr-int 15%, black 100%)
+    }
+    .achievement-rank-END {
+        @include linear-gradient(180deg, $attr-end 15%, black 100%)
+    }
+    .achievement-rank-CHR {
+        @include linear-gradient(180deg, $attr-chr 15%, black 100%)
+    }
+    .achievement-rank-LCK {
+        @include linear-gradient(180deg, $attr-lck 15%, black 100%)
+    }
+}
+
+.progress.progress-custom {
+    position: relative;
+    border: 1px solid black;
+    //margin: 5px 0px 5px 0px;
+    margin: 0;
+    -webkit-box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.75);
+    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.75);
+    .progress-bar {
+        font-weight: bold;
+        font-size: 1.1vw;
+        //min-width: 2%;
+        min-width: 2px;
+        font-family: "Courier New", Courier, monospace;
+        border-right: 1px solid black;
+        >span.amounts {
+            overflow-x: visible;
+            white-space: nowrap;
+            position: absolute;
+            right: .25vw;
+        }
+        >span.workers,
+        >span.breeders {
+            overflow-x: visible;
+            white-space: nowrap;
+            position: absolute;
+            left: .25vw;
+            >i {
+                font-size: .85vw;
+                width: .85vw;
+                line-height: 2.1vh;
+            }
+        }
+        >i {
+            overflow-x: visible;
+            white-space: nowrap;
+            position: absolute;
+            left: .25vw;
+        }
+    }
+}
+
+.progress.progress-playerbox-title {
+    margin: 0;
+    height: 2.4vh;
+    background-color: lighten($brand-primary, 60%);
+    .progress-bar {
+        font-size: .8vw;
+        line-height: 2.0vh;
+        background-color: $brand-primary;
+        @include strokeme($brand-primary)
+    }
+}
+
+div[data-attr="STR"] {
+    .progress {
+        background-color: $attr-str-dim;
+    }
+    .progress-bar {
+        background-color: $attr-str;
+        @include strokeme(black)
+    }
+}
+
+div[data-attr="INT"] {
+    .progress {
+        background-color: $attr-int-dim;
+    }
+    .progress-bar {
+        background-color: $attr-int;
+        @include strokeme(black)
+    }
+}
+
+div[data-attr="END"] {
+    .progress {
+        background-color: $attr-end-dim;
+    }
+    .progress-bar {
+        background-color: $attr-end;
+        @include strokeme(black)
+    }
+}
+
+div[data-attr="CHR"] {
+    .progress {
+        background-color: $attr-chr-dim;
+    }
+    .progress-bar {
+        background-color: $attr-chr;
+        @include strokeme(black);
+    }
+}
+
+div[data-attr="LCK"] {
+    .progress {
+        background-color: $attr-lck-dim;
+    }
+    .progress-bar {
+        background-color: $attr-lck;
+        @include strokeme($attr-lck)
+    }
+}
+
+div[data-attr="NONE"] {
+    .progress {
+        background-color: $attr-none-dim;
+    }
+    .progress-bar {
+        background-color: $attr-none;
+        @include strokeme($attr-none-stroke)
+    }
+}
+
+.goal-container,
+.map-container,
+.population-container {
+    // calc came from trial and error, i couldn't figure out how to calculate it correctly.
+    height: calc(100vh - #{$top-row-height} - 3.5vh - #{$navbar-height} - 18px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.goal-container,
+.map-container,
+.population-container,
+.breeder-container {
+    @include maximize-row();
+    h5 {
+        margin: 2px 0px 1px 0px;
+    }
+    button.btn-primary {
+        @include linear-gradient(180deg, lighten($brand-primary, 20%) 0%, $brand-primary 30%, $brand-primary 100%);
+    }
+    button.btn-primary:hover {
+        @include linear-gradient(180deg, lighten($brand-primary, 30%) 0%, lighten($brand-primary, 10%) 30%, lighten($brand-primary, 10%) 100%);
+    }
+}
+
+.bloqhead-component {
+    @include linear-gradient(135deg, $gray-light 0%, $gray-dark 30%, $gray-dark 100%);
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border: 1px solid black;
+    padding: 5px;
+    -webkit-box-shadow: 10px 10px 5px -5px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 10px 10px 5px -5px rgba(0, 0, 0, 0.75);
+    box-shadow: 10px 10px 5px -5px rgba(0, 0, 0, 0.75);
+}
+
+bloqhead-log {
+    .log-component {
+        font-size: .8vw;
+        height: 100%;
+        overflow-y: scroll;
+        .color-general {
+            color: #2ECC91;
+            background-color: #374C32;
+        }
+        .color-breed {
+            color: #be90d4;
+            background-color: #32334C;
+        }
+        .color-achievement {
+            color: #ff4500;
+            background-color: #4C0701;
+        }
+        .color-work {
+            color: #638bb3;
+            background-color: #01194c;
+        }
+        .list-group {
+            margin: 0;
+        }
+    }
+}
+
+bloqhead-building-list,
+bloqhead-worker-list {
+    h5 {
+        margin: 8px 0px 1px 0px;
+        font-size: .8vw;
+    }
+    button.btn-primary {
+        @include linear-gradient(180deg, lighten($brand-primary, 20%) 0%, $brand-primary 30%, $brand-primary 100%);
+    }
+    button.btn-primary:hover {
+        @include linear-gradient(180deg, lighten($brand-primary, 30%) 0%, lighten($brand-primary, 10%) 30%, lighten($brand-primary, 10%) 100%);
+    }
+}
+
+.player-box {
+    height: 100%;
+    border: 2px solid $gray-darker;
+    margin-bottom: .5vh;
+}
+
+.box-title {
+    background-color: $gray-dark;
+    margin: 0;
+    padding-left: .2vw;
+    padding-right: .1vw;
+    padding-top: .1vh;
+    padding-bottom: .1vh;
+    font-size: 1.1vw;
+    height: 12%;
+    overflow: hidden;
+    vertical-align: middle;
+    border-bottom: 2px solid $gray-darker;
+}
+
+.player-content {
+    padding-left: .25vw;
+    padding-right: .25vw;
+    padding-top: .25vh;
+    padding-bottom: .25vh;
+    height: 88%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    @include linear-gradient(0deg, $gray-light 0%, $gray-dark 30%, $gray-dark 100%);
+}
+
+.fullH {
+    height: 100%;
+}
+
+
+/* Specify styling for tooltip contents */
+
+.tooltip .tooltip-inner {
+    @include linear-gradient(135deg, $gray-light 0%, $gray-dark 30%, $gray-dark 100%);
+    border: 1px solid black;
+    -webkit-box-shadow: 10px 10px 5px -5px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 10px 10px 5px -5px rgba(0, 0, 0, 0.75);
+    box-shadow: 10px 10px 5px -5px rgba(0, 0, 0, 0.75);
+}
+
+.tooltip .tooltip-inner .list-group-item {
+    background-color: rgba(0, 0, 0, 0);
+    padding: 0;
+}
+
+
+/* Hide arrow */
+
+.tooltip .tooltip-arrow {
+    display: none;
+}
+
+
+/* Needed for tooltips to work with disabled buttons */
+
+[disabled] {
+    pointer-events: none;
+}
+
+.male-color {
+    color: dodgerblue;
+}
+
+.female-color {
+    color: hotpink;
+}
+
+.lvl-over {
+    border: 2px dashed $gray-lighter !important;
+}
+
+.lvl-target {
+    background-color: $gray-darker;
+    opacity: 0.9;
+}
+
+.lvl-target * {
+    pointer-events: none;
+}
+
+.lvl-moving {
+    opacity: 0.25;
+    -webkit-transform: scale(0.8);
+    -moz-transform: scale(0.8);
+    -ms-transform: scale(0.8);
+    -o-transform: scale(0.8);
+}
+
+[ng-click] {
+    cursor: pointer;
+}
+
+[draggable] {
+    cursor: move;
+    -webkit-transition: -webkit-transform 0.2s ease-out;
+    -moz-transition: -moz-transform 0.2s ease-out;
+    -o-transition: -o-transform 0.2s ease-out;
+    -ms-transition: -ms-transform 0.2s ease-out;
+}

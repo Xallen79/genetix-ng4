@@ -1,0 +1,44 @@
+<div ng-init="$ctrl.pauseScroll=false">
+    <div class="nopadding col-xs-3">
+        <div class="row topRow">
+            <div class="col-xs-12 fullH">
+                <bloqhead-log></bloqhead-log>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <!--<bloqhead-goal-list></bloqhead-goal-list>-->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <!--
+                <bloqhead-player-box>
+                    <bloqhead-player-box-title>
+                        <i class="fa fa-th"></i> Resources
+                    </bloqhead-player-box-title>
+                    <div class="row">
+                        <bloqhead-resource-list></bloqhead-resource-list>
+                    </div>
+                </bloqhead-player-box>
+                -->
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xs-9 fullH nopadding">
+        <ui-view></ui-view>
+    </div>
+    <nav class="navbar navbar-inverse navbar-fixed-bottom game-menu">
+        <div class="container-fluid">
+            <ul class="nav navbar-nav">
+                <li><button class="btn btn-primary" uiSref="main">Main</button></li>
+                <li><button class="btn btn-primary" uiSref="farm">Farm</button></li>
+                <li><button class="btn btn-primary" uiSref="achievements">Achievements</button></li>
+                <li><button class="btn btn-primary" uiSref="test">Test Interface</button></li>
+
+            </ul>
+            <bloqhead-game-control class="navbar-brand navbar-right"></bloqhead-game-control>
+        </div>
+    </nav>
+</div>
