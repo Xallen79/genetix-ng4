@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Hive } from './classes/hive.class';
 import * as Bee from './classes/bee.class';
 import { GameService } from './game.service';
@@ -10,7 +10,7 @@ import { Subscription } from "rxjs/Subscription";
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss']
 })
-export class GameComponent {
+export class GameComponent implements OnInit, OnDestroy {
   hives: Hive[];
   title = 'GenetixNg4';
   count: number = 0;

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
+import { GameService } from 'app/game.service';
 @Component({
   selector: 'bloqhead-population',
   templateUrl: './population.component.html',
@@ -7,7 +7,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class PopulationComponent implements OnInit {
 
-  constructor() { }
+  constructor(private _gameService: GameService) { }
 
   ngOnInit() {
   }

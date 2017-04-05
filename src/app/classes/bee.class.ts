@@ -1,10 +1,10 @@
 import { Trait } from "app/config/traits.config";
-import {ConfigService} from "app/config/config.service"
+import { ConfigService } from "app/config/config.service"
 
 interface BeeState {
-    id? :string;
-    pos?:string;
-    tripStart?:string;
+    id?: string;
+    pos?: string;
+    tripStart?: string;
     tripEnd?: string;
     tripElaspedTime?: number;
     tripTotalTime?: number;
@@ -16,13 +16,14 @@ interface BeeState {
     jid?: string;
     msSinceWork?: number;
     jobStepIndex?: number;
-    nodeIndex?: number;    
+    nodeIndex?: number;
     beeMutationChance?: number;
-    dead?:boolean;
+    dead?: boolean;
     nodeIds?: string[];
-    beetype?:BeeTypes;
-    traits?:Trait[];
-    [propName: string]: any;    
+    beetype?: BeeTypes;
+    traits?: Trait[];
+    name?: string;
+    [propName: string]: any;
 }
 export type BeeTypes = "queen" | "drone" | "worker" | "larva" | "egg";
 export const BeeTypes = {
@@ -34,9 +35,9 @@ export const BeeTypes = {
 
 };
 export abstract class BaseBee implements BeeState {
-    id? :string;
-    pos?:string;
-    tripStart?:string;
+    id?: string;
+    pos?: string;
+    tripStart?: string;
     tripEnd?: string;
     tripElaspedTime?: number;
     tripTotalTime?: number;
@@ -48,17 +49,18 @@ export abstract class BaseBee implements BeeState {
     jid?: string;
     msSinceWork?: number;
     jobStepIndex?: number;
-    nodeIndex?: number;    
+    nodeIndex?: number;
     beeMutationChance?: number;
-    dead?:boolean;
+    dead?: boolean;
     nodeIds?: string[];
-    beetype:BeeTypes;
-    traits?:Trait[];
+    beetype: BeeTypes;
+    traits?: Trait[];
+    name?: string;
 
     constructor(config: BeeState) {
         this.update(config);
     }
-    update(config):void {
+    update(config): void {
         this.id = config.id || this.id || '0';
         this.pos = config.pos || this.pos || 'A1';
         this.tripStart = config.tripStart || this.tripStart || null;
@@ -73,14 +75,15 @@ export abstract class BaseBee implements BeeState {
         this.jid = config.currentJob || config.jid || this.jid || 'IDLE';
         this.msSinceWork = config.msSinceWork || this.msSinceWork || 0;
         this.jobStepIndex = config.jobStepIndex || this.jobStepIndex || 0;
-        this.dead=(config.dead != null) ? config.dead : this.dead != null ? this.dead : false;
+        this.dead = (config.dead != null) ? config.dead : this.dead != null ? this.dead : false;
         this.nodeIds = config.nodeIds || this.nodeIds || [];
         //this.nodes = this.nodes || [];
         this.nodeIndex = config.nodeIndex || this.nodeIndex || 0;
-        this.beeMutationChance = config.beeMutationChance || this.beeMutationChance || 0.005; 
+        this.beeMutationChance = config.beeMutationChance || this.beeMutationChance || 0.005;
+        this.name = this.beetype + this.id;
     }
 
-    die():void {
+    die(): void {
         this.dead = true;
     }
 
@@ -93,14 +96,14 @@ export class Queen extends BaseBee {
         this.beetype = BeeTypes.QUEEN;
         this.minDrones = 10;
         this.update(config);
-        
+
     }
-    update(config:BeeState):void {        
+    update(config: BeeState): void {
         super.update(config);
 
     }
 
-    mate(drone:Drone):void {
+    mate(drone: Drone): void {
         drone.die();
     }
 
@@ -108,11 +111,11 @@ export class Queen extends BaseBee {
 
 export class Drone extends BaseBee {
 
-    constructor(config:BeeState) {
+    constructor(config: BeeState) {
         super(config);
         this.update(config);
     }
-    update(config:BeeState):void{
+    update(config: BeeState): void {
         super.update
     }
 }
