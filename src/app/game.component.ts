@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Hive } from './classes/hive.class';
 import * as Bee from './classes/bee.class';
 import { GameService } from './game.service';
-import { LogService } from 'app/logComponent/log.component';
+import { LogService } from 'app/log/log.component';
 import { Subscription } from "rxjs/Subscription";
 
 @Component({

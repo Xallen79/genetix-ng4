@@ -1,6 +1,6 @@
 import { GameComponent } from 'app/game.component';
-import { MainGameComponent } from 'app/mainGame/mainGame.component';
-import { TestInterfaceComponent } from 'app/testInterface/testInterface.component';
+import { MainGameComponent } from 'app/main-game/main-game.component';
+import { TestInterfaceComponent } from 'app/test-interface/test-interface.component';
 
 export const gameState = {
     name: 'game',

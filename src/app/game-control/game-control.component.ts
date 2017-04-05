@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { GameService } from 'app/game.service';
 import { Subscription } from "rxjs/Subscription";
 
@@ -11,7 +11,7 @@ import { Subscription } from "rxjs/Subscription";
     '</div>'
 
 })
-export class GameControl {
+export class GameControl implements OnInit {
     RUNNING: boolean;
     stateSub: Subscription;
     constructor(private _gameService: GameService) { }

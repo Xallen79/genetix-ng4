@@ -1,4 +1,4 @@
-import { Component, Injectable } from '@angular/core';
+import { Component, Injectable, OnInit } from '@angular/core';
 
 
 
@@ -30,11 +30,10 @@ export class LogService {
      *
      */
     constructor() {
-
         this.messages = [];
         this.logGeneralMessage("Welcome to Genetix!");
-
     }
+
     logGeneralMessage(message) {
         this.messages.push(new LogMessage({ type: LogType.GENERAL, timestamp: Date.now(), message: message }));
         if (this.messages.length > this.maxMessages)
@@ -71,7 +70,7 @@ export class LogService {
     selector: 'bloqhead-log',
     templateUrl: './log.component.html',
 })
-export class LogComponent {
+export class LogComponent implements OnInit {
 
     constructor(private _logService: LogService) {
     }
