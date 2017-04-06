@@ -5,8 +5,8 @@ import { Subscription } from "rxjs/Subscription";
 @Component({
     selector: 'bloqhead-game-control',
     template: '<div>' +
-    '<button title="Save Game" type="button" class="btn btn-xs btn-primary" (click)="_gameService.saveGame();"><i class="fa fa-floppy-o"></i></button>' +
-    '<button title="Hard Reset" type="button" class="btn btn-xs btn-primary" ng-click="$ctrl.resetSave();"><i class="fa fa-recycle"></i></button>' +
+    '<button title="Save Game" type="button" class="btn btn-xs btn-primary" (click)="_gameService.saveGame()"><i class="fa fa-floppy-o"></i></button>' +
+    '<button title="Hard Reset" type="button" class="btn btn-xs btn-primary" (click)="_gameService.hardReset()"><i class="fa fa-recycle"></i></button>' +
     '<button title="Play/Pause" type="button" class="btn btn-xs btn-primary" (click)="_gameService.toggleState()"><i class="fa" ngClass="{{getIcon()}}"></i></button>' +
     '</div>'
 

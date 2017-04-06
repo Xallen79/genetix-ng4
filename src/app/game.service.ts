@@ -10,7 +10,9 @@ export class GameService {
     hives: Hive[];
     saveTime: number;
     lastTime: number;
-    stepTimeMs: number
+    stepTimeMs: number;
+    gameSaveKey: string = "GENETIX_SAVE"
+    lastSave: string = "";
     private _elapsedMs = new BehaviorSubject<number>(0);
     private _running = new BehaviorSubject<boolean>(true);
     gameLoopEvent$ = this._elapsedMs.asObservable();
@@ -23,15 +25,23 @@ export class GameService {
     }
 
     initGame() {
+        var s = localStorage.getItem(this.gameSaveKey)
+        var json = LZString.decompressFromBase64(s);
+        this.lastSave = s;
+        var savedState = json ? JSON.parse(json) : null;
+        this.saveTime = savedState && savedState.saveTime || Date.now();
+        this.lastTime = this.saveTime - Date.now();
+        this.stepTimeMs = savedState && savedState.stepTimeMs || 1000;
         this.hives = [];
-        var bees = [];
-        bees.push(new Bee.Queen({ id: "1-H1" }))
-        this.hives.push(new Hive({ id: 1, nextId: 1, bees: bees }));
-        var json = JSON.stringify(this.hives[0]);
-        var hive2 = JSON.parse(json);
-        hive2.id = 2;
-        hive2.bees[0].id = "1-H2";
-        this.hives.push(new Hive(hive2));
+        if (savedState && savedState.hives) {
+            for (let hiveState of savedState.hives) {
+                this.hives.push(new Hive(hiveState));
+            }
+        } else {
+            this.hives = [];
+            this.addHive("G5");
+            this.addHive("G9");
+        }
         this.gameLoop(0);
     }
 
@@ -54,7 +64,17 @@ export class GameService {
     getHives(): Hive[] {
         return this.hives;
     }
-
+    addHive(position: string): Hive {
+        var id = this.hives.length + 1;
+        var bees = [];
+        bees.push(new Bee.Queen({ id: "1-H" + id }));
+        for (var i = 0; i < 10; i++) {
+            bees.push(new Bee.Drone({ id: i + 2 + "-H" + id }));
+        }
+        var hive = new Hive({ id: id, nextId: 12, bees: bees, pos: position });
+        this.hives.push(hive);
+        return hive;
+    }
     toggleState() {
         this._running.next(!this._running.value);
     }
@@ -66,6 +86,13 @@ export class GameService {
             stepTimeMs: this.stepTimeMs,
             hives: this.hives
         };
-        console.log(LZString.compressToBase64(JSON.stringify(state)));
+        var save = LZString.compressToBase64(JSON.stringify(state));
+        console.log(save);
+        this.lastSave = save;
+        localStorage.setItem(this.gameSaveKey, save);
+    }
+    hardReset() {
+        localStorage.removeItem(this.gameSaveKey);
+        this.initGame();
     }
 }

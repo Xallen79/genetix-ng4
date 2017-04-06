@@ -50,3 +50,8 @@ import { GoalListComponent } from './goal-list/goal-list.component';
   bootstrap: [UIView]
 })
 export class AppModule { }
+
+export function randomIntFromInterval(min: number, max: number, func?) {
+  if (func == null) func = Math.random;
+  return Math.floor(func() * (max - min + 1) + min);
+}

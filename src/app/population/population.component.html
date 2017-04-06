@@ -9,7 +9,9 @@
     </h3>
     <div class="player-content">
         <div class="row population-container">
-            <span *ngFor="let bee of _gameService.hives[1].bees">{{bee.name}}</span>
+            <ul>
+                <li *ngFor="let bee of _gameService.hives[1].bees">{{bee.name}}</li>
+            </ul>
             <!--<div class="col-xs-12">
                 <uib-tabset type="pills">
 
