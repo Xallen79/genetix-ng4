@@ -3,11 +3,12 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Hive } from 'app/classes/hive.class';
 import * as Bee from './classes/bee.class';
+import { Map } from 'app/classes/map.class';
 
 
 @Injectable()
 export class GameService {
-    hives: Hive[];
+    map: Map;
     saveTime: number;
     lastTime: number;
     stepTimeMs: number;
@@ -32,15 +33,11 @@ export class GameService {
         this.saveTime = savedState && savedState.saveTime || Date.now();
         this.lastTime = this.saveTime - Date.now();
         this.stepTimeMs = savedState && savedState.stepTimeMs || 1000;
-        this.hives = [];
-        if (savedState && savedState.hives) {
-            for (let hiveState of savedState.hives) {
-                this.hives.push(new Hive(hiveState));
-            }
+
+        if (savedState && savedState.map) {
+            this.map = new Map(this.stepTimeMs, savedState.map);
         } else {
-            this.hives = [];
-            this.addHive("G5");
-            this.addHive("G9");
+            this.map = new Map(this.stepTimeMs, null);
         }
         this.gameLoop(0);
     }
@@ -55,26 +52,12 @@ export class GameService {
         this.lastTime += (this.stepTimeMs * steps);
         if (this._running.value && steps > 0) {
             this._elapsedMs.next(this.stepTimeMs * steps);
-            this.hives[0].bees[0].msSinceWork += this.stepTimeMs * steps;
+            this.map.handleGameLoop(this.stepTimeMs * steps);
         }
         window.requestAnimationFrame(this.gameLoop.bind(this));
 
     }
 
-    getHives(): Hive[] {
-        return this.hives;
-    }
-    addHive(position: string): Hive {
-        var id = this.hives.length + 1;
-        var bees = [];
-        bees.push(new Bee.Queen({ id: "1-H" + id }));
-        for (var i = 0; i < 10; i++) {
-            bees.push(new Bee.Drone({ id: i + 2 + "-H" + id }));
-        }
-        var hive = new Hive({ id: id, nextId: 12, bees: bees, pos: position });
-        this.hives.push(hive);
-        return hive;
-    }
     toggleState() {
         this._running.next(!this._running.value);
     }
@@ -84,7 +67,7 @@ export class GameService {
             saveTime: this.saveTime,
             lastTime: this.lastTime,
             stepTimeMs: this.stepTimeMs,
-            hives: this.hives
+            map: this.map
         };
         var save = LZString.compressToBase64(JSON.stringify(state));
         console.log(save);

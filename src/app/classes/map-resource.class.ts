@@ -77,19 +77,76 @@ export class MapResource implements IMapResource {
     }
 
     queueHarvest(bee: Bee.BaseBee): void {
-        throw new Error('Method not implemented.');
+        //logService.logWorkMessage(bee.name + ' reached ' + this.name);
+        bee.waitingAtResource = true;
+        // add the bee to the collection queue
+        this.bees.push(bee);
     }
     processElapsedTime(ms: number): void {
-        throw new Error('Method not implemented.');
+        if (this.cooldownRemaining > 0) {
+            this.cooldownRemaining -= ms;
+        }
+        // if the cooldown has elapsed and there is a bee waiting and no bees are currently harvesting
+        if (this.cooldownRemaining <= 0 && this.bees.length > 0 && this.beeIsHarvesting === false) {
+            this.beeIsHarvesting = true;
+            var bee = this.bees.shift();
+            bee.waitingAtResource = false;
+            bee.harvesting = true;
+        }
     }
     doneHarvesting(): void {
-        throw new Error('Method not implemented.');
+        this.cooldownRemaining = this.cooldown;
+        this.beeIsHarvesting = false;
+        this.col_nectar = 0;
+        this.col_pollen = 0;
+        this.col_water = 0;
     }
     getAvailable(rid: string): number {
-        throw new Error('Method not implemented.');
+        var avail = 0;
+        switch (rid) {
+            case "NECTAR":
+                avail = this.nectar - this.col_nectar;
+                break;
+            case "POLLEN":
+                avail = this.pollen - this.col_pollen;
+                break;
+            case "WATER":
+                avail = this.water - this.col_water;
+                break;
+        }
+        return avail;
     }
     collect(rid: string, amount: number): number {
-        throw new Error('Method not implemented.');
+        var harvestAmount = 0;
+        var avail = 0;
+        switch (rid) {
+            case "NECTAR":
+                avail = this.getAvailable(rid);
+                if (amount <= avail)
+                    harvestAmount = amount;
+                else if (avail > 0)
+                    harvestAmount = avail;
+                this.col_nectar += harvestAmount;
+
+                break;
+            case "POLLEN":
+                avail = this.getAvailable(rid);
+                if (amount <= avail)
+                    harvestAmount = amount;
+                else if (avail > 0)
+                    harvestAmount = avail;
+                this.col_pollen += harvestAmount;
+                break;
+            case "WATER":
+                avail = this.getAvailable(rid);
+                if (amount <= avail)
+                    harvestAmount = amount;
+                else if (avail > 0)
+                    harvestAmount = avail;
+                this.col_water += harvestAmount;
+                break;
+        }
+        return harvestAmount;
     }
 
 }

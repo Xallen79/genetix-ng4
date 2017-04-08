@@ -18,7 +18,7 @@ export class GameComponent implements OnInit, OnDestroy {
   constructor(private _gameService: GameService, private _logService: LogService) {
   }
   ngOnInit() {
-    this.hives = this._gameService.getHives();
+    this.hives = this._gameService.map.hives;
     this.gameLoopSub = this._gameService.gameLoopEvent$.subscribe(elapsedMs => {
       while (elapsedMs > 0) { this.count++; elapsedMs -= 1000; if (this.count % 10 === 0) this._logService.logGeneralMessage("Test"); }
     });
