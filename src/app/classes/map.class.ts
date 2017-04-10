@@ -3,6 +3,7 @@ import { Grid, IGridConfig } from 'app/classes/hexmap/grid.class';
 import { Point } from 'app/classes/hexmap/point.class';
 import * as Bee from 'app/classes/bee.class';
 import { MapResource } from 'app/classes/map-resource.class';
+import { ConfigService } from 'app/config/config.service';
 interface IMapState {
     hives?: Hive[];
     mapResources?: MapResource[];
@@ -44,7 +45,7 @@ export class Map implements IMap {
     stepTimeMs: number;
     private Q_PI: number = Math.PI / 4;
     private TWO_PI: number = Math.PI * 2;
-    constructor(stepTimeMs: number, state?: IMapState) {
+    constructor(private _configService: ConfigService, stepTimeMs: number, state?: IMapState) {
         this.hives = [];
         this.mapResources = [];
         this.stepTimeMs = stepTimeMs;
@@ -167,7 +168,9 @@ export class Map implements IMap {
             "initialSize": 2,
             "maxSize": 5,
             "beeMutationChance": 0.0025,
-            "pos": position
+            "pos": position,
+            "resources": this._configService.getDefaultResources(),
+            "buildings": this._configService.getDefaultBuildings()
         });
         this.hives.push(hive);
         return hive;

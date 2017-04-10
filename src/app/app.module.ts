@@ -4,6 +4,7 @@ import { UIRouterModule, UIView } from "ui-router-ng2";
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { GameService } from 'app/game.service';
+import { ConfigService } from 'app/config/config.service';
 import { GameComponent } from './game.component';
 import { GameControl } from './game-control/game-control.component';
 import { MainGameComponent } from 'app/main-game/main-game.component';
@@ -46,7 +47,7 @@ import { GoalListComponent } from './goal-list/goal-list.component';
     }),
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  providers: [GameService, LogService],
+  providers: [GameService, LogService, ConfigService],
   bootstrap: [UIView]
 })
 export class AppModule { }

@@ -1,5 +1,5 @@
-
-export type BuildingUse = "housing" | "storage" | "nursery"
+import { ResourceID } from 'app/config/resourceTypes.config';
+export type BuildingUse = 'housing' | 'storage' | 'nursery';
 export const BuildingUse = {
     HOUSING: 'housing' as BuildingUse,
     STORAGE: 'storage' as BuildingUse,
@@ -7,9 +7,21 @@ export const BuildingUse = {
 
 };
 
+export type BuildingID = 'dormitory' | 'nursery' | 'storage_nectar' | 'storage_pollen' | 'storage_water' | 'storage_wax' | 'storage_jelly' | 'storage_honey' | 'storage_food';
+export const BuildingID = {
+    DORMITORY: 'dormitory' as BuildingID,
+    NURSERY: 'nursery' as BuildingID,
+    STORAGE_NECTAR: 'storage_nectar' as BuildingID,
+    STORAGE_POLLEN: 'storage_pollen' as BuildingID,
+    STORAGE_WATER: 'storage_water' as BuildingID,
+    STORAGE_WAX: 'storage_wax' as BuildingID,
+    STORAGE_JELLY: 'storage_jelly' as BuildingID,
+    STORAGE_HONEY: 'storage_honey' as BuildingID,
+    STORAGE_FOOD: 'storage_food' as BuildingID
+}
 
 interface IBuildingType {
-    id: string;
+    bid: BuildingID;
     name: string;
     description: string;
     use: BuildingUse;
@@ -17,9 +29,9 @@ interface IBuildingType {
         base: number;
         percent: number;
     };
-    rid?: string;/*ResourceType*/
+    rid?: ResourceID;/*ResourceType*/
     cost: [{
-        rid: string;/*ResourceType*/
+        rid: ResourceID;/*ResourceType*/
         base: number;
         percent: number;
     }],
@@ -30,7 +42,7 @@ interface IBuildingType {
 }
 
 export class Building implements IBuildingType {
-    id: string;
+    bid: BuildingID;
     name: string;
     description: string;
     use: BuildingUse;
@@ -38,9 +50,9 @@ export class Building implements IBuildingType {
         base: number,
         percent: number
     };
-    rid?: string;/*ResourceType*/
+    rid?: ResourceID;/*ResourceType*/
     cost: [{
-        rid: string,/*ResourceType*/
+        rid: ResourceID,/*ResourceType*/
         base: number,
         percent: number
     }];
@@ -49,7 +61,7 @@ export class Building implements IBuildingType {
     unlocked: boolean;
     multiplier: number;
     constructor(buildingType: IBuildingType) {
-        this.id = buildingType.id;
+        this.bid = buildingType.bid;
         this.name = buildingType.name;
         this.description = buildingType.description;
         this.use = buildingType.use;
@@ -65,7 +77,7 @@ export class Building implements IBuildingType {
 
 export var DEFAULT_BUILDINGS: IBuildingType[] = [
     {
-        id: "DORMITORY",
+        bid: BuildingID.DORMITORY,
         name: "Dormitory",
         description: "Where the adult bees live.",
         use: BuildingUse.HOUSING,
@@ -74,7 +86,7 @@ export var DEFAULT_BUILDINGS: IBuildingType[] = [
             percent: 15
         },
         cost: [{
-            rid: "WAX",
+            rid: "wax",
             base: 50,
             percent: 125
         }],
@@ -84,7 +96,7 @@ export var DEFAULT_BUILDINGS: IBuildingType[] = [
         multiplier: 1
     },
     {
-        id: "NURSERY",
+        bid: BuildingID.NURSERY,
         name: "Nursery",
         description: "Where the eggs and larva live.",
         use: BuildingUse.NURSERY,
@@ -94,7 +106,7 @@ export var DEFAULT_BUILDINGS: IBuildingType[] = [
         },
         cost: [
             {
-                rid: "WAX",
+                rid: "wax",
                 base: 50,
                 percent: 125
             }
@@ -105,18 +117,18 @@ export var DEFAULT_BUILDINGS: IBuildingType[] = [
         multiplier: 1
     },
     {
-    id: "STORAGE_NECTAR",
-    name: "%(resource)s Storage",
+        bid: BuildingID.STORAGE_NECTAR,
+        name: "%(resource)s Storage",
         description: "Stores %(resource)s.",
         use: "storage",
-        rid: "NECTAR",
+        rid: "nectar",
         size: {
             base: 75,
             percent: 100
         },
         cost: [
             {
-                rid: "WAX",
+                rid: "wax",
                 base: 50,
                 percent: 125
             }
@@ -127,18 +139,18 @@ export var DEFAULT_BUILDINGS: IBuildingType[] = [
         multiplier: 1
     },
     {
-    id: "STORAGE_POLLEN",
-    name: "%(resource)s Storage",
+        bid: BuildingID.STORAGE_POLLEN,
+        name: "%(resource)s Storage",
         description: "Stores %(resource)s.",
         use: "storage",
-        rid: "POLLEN",
+        rid: "pollen",
         size: {
             base: 75,
             percent: 100
         },
         cost: [
             {
-                rid: "WAX",
+                rid: "wax",
                 base: 50,
                 percent: 125
             }
@@ -149,18 +161,18 @@ export var DEFAULT_BUILDINGS: IBuildingType[] = [
         multiplier: 1
     },
     {
-    id: "STORAGE_WATER",
-    name: "%(resource)s Storage",
+        bid: BuildingID.STORAGE_WATER,
+        name: "%(resource)s Storage",
         description: "Stores %(resource)s.",
         use: "storage",
-        rid: "WATER",
+        rid: "water",
         size: {
             base: 75,
             percent: 100
         },
         cost: [
             {
-                rid: "WAX",
+                rid: "wax",
                 base: 50,
                 percent: 125
             }
@@ -169,20 +181,20 @@ export var DEFAULT_BUILDINGS: IBuildingType[] = [
         gifted: 1,
         unlocked: true,
         multiplier: 1
-    },    
+    },
     {
-    id: "STORAGE_FOOD",
-    name: "%(resource)s Storage",
+        bid: BuildingID.STORAGE_FOOD,
+        name: "%(resource)s Storage",
         description: "Stores %(resource)s.",
         use: "storage",
-        rid: "FOOD",
+        rid: "food",
         size: {
             base: 75,
             percent: 100
         },
         cost: [
             {
-                rid: "WAX",
+                rid: "wax",
                 base: 50,
                 percent: 125
             }
@@ -191,20 +203,20 @@ export var DEFAULT_BUILDINGS: IBuildingType[] = [
         gifted: 1,
         unlocked: true,
         multiplier: 1
-    },    
+    },
     {
-    id: "STORAGE_HONEY",
-    name: "%(resource)s Storage",
+        bid: BuildingID.STORAGE_HONEY,
+        name: "%(resource)s Storage",
         description: "Stores %(resource)s.",
         use: "storage",
-        rid: "HONEY",
+        rid: "honey",
         size: {
             base: 75,
             percent: 100
         },
         cost: [
             {
-                rid: "WAX",
+                rid: "wax",
                 base: 50,
                 percent: 125
             }
@@ -213,20 +225,20 @@ export var DEFAULT_BUILDINGS: IBuildingType[] = [
         gifted: 1,
         unlocked: true,
         multiplier: 1
-    },    
+    },
     {
-    id: "STORAGE_JELLY",
-    name: "%(resource)s Storage",
+        bid: BuildingID.STORAGE_JELLY,
+        name: "%(resource)s Storage",
         description: "Stores %(resource)s.",
         use: "storage",
-        rid: "JELLY",
+        rid: "royal_jelly",
         size: {
             base: 75,
             percent: 100
         },
         cost: [
             {
-                rid: "WAX",
+                rid: "wax",
                 base: 50,
                 percent: 125
             }
@@ -235,20 +247,20 @@ export var DEFAULT_BUILDINGS: IBuildingType[] = [
         gifted: 1,
         unlocked: true,
         multiplier: 1
-    },    
+    },
     {
-    id: "STORAGE_WAX",
-    name: "%(resource)s Storage",
+        bid: BuildingID.STORAGE_WAX,
+        name: "%(resource)s Storage",
         description: "Stores %(resource)s.",
         use: "storage",
-        rid: "WAX",
+        rid: "wax",
         size: {
             base: 75,
             percent: 100
         },
         cost: [
             {
-                rid: "WAX",
+                rid: "wax",
                 base: 50,
                 percent: 125
             }

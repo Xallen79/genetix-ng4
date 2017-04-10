@@ -1,7 +1,8 @@
 import * as Bee from './bee.class';
-import { DEFAULT_BUILDINGS, Building } from '../config/buildingTypes.config';
-import { DEFAULT_RESOURCES, Resource } from '../config/resourceTypes.config';
+import { Building } from '../config/buildingTypes.config';
+import { Resource } from '../config/resourceTypes.config';
 import { Map } from 'app/classes/map.class';
+
 interface IHiveState {
     id: number;
     pos?: string;
@@ -21,8 +22,10 @@ interface IHive extends IHiveState {
     getBeeById(id: string): Bee.BaseBee;
     getNurseyCount(): number;
     loadBees(state: IHiveState): void;
+    createInitialQueen(inseminate: boolean): void;
     updateResources(state: IHiveState): void;
     updateBuildings(state: IHiveState): void;
+    getNextId(): string;
     handleGameLoop(elapsedMs: number, map: Map): void;
 
 
@@ -46,7 +49,7 @@ export class Hive implements IHive {
 
     update(state: IHiveState): void {
         this.id = state.id || this.id || 1;
-        this.nextId = state.nextId || this.nextId || 1;
+        this.nextId = state.nextId || this.nextId || 0;
         this.initialSize = state.initialSize || this.initialSize || 2;
         this.maxSize = state.maxSize || this.maxSize || 10;
         this.pos = state.pos || this.pos || 'A1';
@@ -54,8 +57,10 @@ export class Hive implements IHive {
         this.beeMutationChance = state.beeMutationChance || this.beeMutationChance || 0.005;
         if (state.bees != null)
             this.loadBees(state);
-        else
+        else {
             this.bees = this.bees || [];
+            if (this.bees.length === 0) this.createInitialQueen(true);
+        }
 
         if (state.resources == null) {
             this.updateResources(state);
@@ -96,7 +101,28 @@ export class Hive implements IHive {
             }
         }
     }
-
+    createInitialQueen(inseminate: boolean): void {
+        var queen = new Bee.Queen({
+            id: this.getNextId(),
+            generation: 0,
+            beeMutationChance: this.beeMutationChance,
+            jid: 'breeder',
+            pos: this.pos
+        });
+        if (inseminate) {
+            for (var d = 0; d < 10; d++) {
+                var drone = new Bee.Drone({
+                    id: this.getNextId(),
+                    generation: 0,
+                    beeMutationChance: this.beeMutationChance,
+                    pos: this.pos
+                });
+                queen.mate(drone);
+            }
+        }
+        queen.update();
+        this.bees.push(queen);
+    }
     updateResources(state: IHiveState): void {
 
     }
@@ -104,6 +130,11 @@ export class Hive implements IHive {
     updateBuildings(state: IHiveState): void {
 
     }
+
+    getNextId(): string {
+        return ++this.nextId + '-H' + this.id;
+    }
+
 
     handleGameLoop(ms: number, map: Map): void {
 

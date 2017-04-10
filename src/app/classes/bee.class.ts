@@ -1,6 +1,11 @@
 import { Trait } from "app/config/traits.config";
 import { ConfigService } from "app/config/config.service"
 import { Genome } from "app/classes/genome.class";
+import { Hexagon } from "app/classes/hexmap/hexagon.class";
+import { JobID, JOB_TYPES, JobAction } from "app/config/jobTypes.config";
+import { Hive } from "app/classes/hive.class";
+
+import { Map } from "app/classes/map.class";
 
 interface IBeeState {
     id: string;
@@ -15,9 +20,9 @@ interface IBeeState {
     queenParentId?: string;
     droneParentId?: string;
     generation?: number;
-    jid?: string;
+    jid?: JobID;
+    action?: JobAction;
     msSinceWork?: number;
-    jobStepIndex?: number;
     nodeIndex?: number;
     beeMutationChance?: number;
     dead?: boolean;
@@ -28,7 +33,23 @@ interface IBeeState {
     [propName: string]: any;
 }
 interface IBee extends IBeeState {
+    update(state?: IBeeState): void;
     die(): void;
+    mature(type: BeeTypes): BaseBee;
+    hatch(type: BeeTypes): BaseBee;
+    mate(bee: BaseBee): void;
+    storageAmount(rid: string): number;
+    storageFull(): boolean;
+    setJob(jid: string): void;
+    addWaypointNode(hexagon: Hexagon): void;
+    removeWaypointNode(hexagon: Hexagon): void;
+    doSpawn(ms: number, hive: Hive): void;
+    doTravel(ms: number, hive: Hive, map: Map): void;
+    doCollect(ms: number, hive: Hive, map: Map): void;
+    doDeposit(ms: number, hive: Hive): void;
+    goHome(ms: number, hive: Hive, map: Map): void;
+    doWork(ms: number, hive: Hive, map: Map): void;
+
 }
 export type BeeTypes = "queen" | "drone" | "worker" | "larva" | "egg";
 export const BeeTypes = {
@@ -40,6 +61,7 @@ export const BeeTypes = {
 
 };
 export abstract class BaseBee implements IBee {
+
     [propName: string]: any;
     id: string;
     beetype: BeeTypes;
@@ -53,9 +75,9 @@ export abstract class BaseBee implements IBee {
     queenParentId?: string;
     droneParentId?: string;
     generation?: number;
-    jid?: string;
+    jid?: JobID;
+    action?: JobAction;
     msSinceWork?: number;
-    jobStepIndex?: number;
     nodeIndex?: number;
     beeMutationChance?: number;
     dead?: boolean;
@@ -64,10 +86,11 @@ export abstract class BaseBee implements IBee {
     name?: string;
     genome?: Genome;
 
+
     constructor(config?: IBeeState) {
         //this.update(config);
     }
-    update(config: IBeeState): void {
+    update(config?: IBeeState): void {
         this.id = config && config.id || this.id || '0';
         this.pos = config && config.pos || this.pos || 'A1';
         this.tripStart = config && config.tripStart || this.tripStart || null;
@@ -79,7 +102,7 @@ export abstract class BaseBee implements IBee {
         this.queenParentId = config && config.queenParentId || this.queenParentId || null;
         this.droneParentId = config && config.droneParentId || this.droneParentId || null;
         this.generation = config && config.generation || this.generation || 0;
-        this.jid = config && config.currentJob || config.jid || this.jid || 'IDLE';
+        this.jid = config && config.jid || this.jid || 'idle';
         this.msSinceWork = config && config.msSinceWork || this.msSinceWork || 0;
         this.jobStepIndex = config && config.jobStepIndex || this.jobStepIndex || 0;
         this.dead = (config && config.dead != null) ? config.dead : this.dead != null ? this.dead : false;
@@ -95,6 +118,92 @@ export abstract class BaseBee implements IBee {
     die(): void {
         this.dead = true;
     }
+    mature(type: BeeTypes): BaseBee {
+        throw new Error('Method not implemented.');
+    }
+    hatch(type: BeeTypes): BaseBee {
+        throw new Error('Method not implemented.');
+    }
+    mate(bee: BaseBee): void {
+        throw new Error('Method not implemented.');
+    }
+    storageAmount(rid: string): number {
+        throw new Error('Method not implemented.');
+    }
+    storageFull(): boolean {
+        throw new Error('Method not implemented.');
+    }
+    setJob(jid: JobID): void {
+        if (this.jid === jid) return;
+
+        var job = JOB_TYPES.find(j => j.jid === jid);
+        if (job.beetypes.indexOf(this.beetype) === -1) {
+            return;
+        }
+
+        this.jid = jid;
+        this.msSinceWork = 0;
+        this.action = null;
+        this.nodes = [];
+        this.nodeIds = [];
+        this.nodeIndex = 0;
+        this.isMoving = false;
+    }
+    addWaypointNode(hexagon: Hexagon): void {
+        throw new Error('Method not implemented.');
+    }
+    removeWaypointNode(hexagon: Hexagon): void {
+        throw new Error('Method not implemented.');
+    }
+    doSpawn(ms: number, hive: Hive) {
+        throw new Error('Method not implemented.');
+    }
+    doTravel(ms: number, hive: Hive, map: Map): void {
+        throw new Error('Method not implemented.');
+    }
+    doCollect(ms: number, hive: Hive, map: Map): void {
+        throw new Error('Method not implemented.');
+    }
+    doDeposit(ms: number, hive: Hive): void {
+        throw new Error('Method not implemented.');
+    }
+    goHome(ms: number, hive: Hive, map: Map): void {
+        throw new Error('Method not implemented.');
+    }
+    doWork(ms: number, hive: Hive, map: Map): void {
+        if (this.action === null) {
+            this.goHome(ms, hive, map);
+            return;
+        }
+
+        switch (this.jid) {
+            case JobID.BREEDER:
+                if (this.action === JobAction.SPAWN)
+                    this.doSpawn(ms, hive);
+                break;
+            case JobID.NURSE:
+            case JobID.PRODUCER_FOOD:
+            case JobID.PRODUCER_HONEY:
+            case JobID.BUILDER:
+            case JobID.UNDERTAKER:
+                if (this.action === JobAction.PRODUCE) {
+                    this.doProduce(ms, hive);
+                }
+                break;
+            case JobID.FORAGER:
+                if (this.action === JobAction.TRAVEL) {
+                    this.doTravel(ms, hive, map);
+                } else if (this.action === JobAction.COLLECT) {
+                    this.doCollect(ms, hive, map);
+                } else if (this.action === JobAction.DEPOSIT) {
+                    this.doDeposit(ms, hive);
+                }
+                break;
+            default:
+                this.msSinceWork = 0;
+                break;
+        }
+    }
 
 
 }
@@ -109,12 +218,13 @@ export class Queen extends BaseBee {
         this.update(config);
 
     }
-    update(config: IBeeState): void {
+    update(config?: IBeeState): void {
         super.update(config);
 
     }
 
-    mate(drone: Drone): void {
+    mate(drone: BaseBee): void {
+        if (drone.beetype !== BeeTypes.DRONE) throw new Error("Queen cannot mate with non-drone bees");
         drone.die();
     }
 
@@ -127,7 +237,7 @@ export class Drone extends BaseBee {
         this.beetype = BeeTypes.DRONE;
         this.update(config);
     }
-    update(config: IBeeState): void {
+    update(config?: IBeeState): void {
         super.update(config);
     }
 }

@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Hive } from 'app/classes/hive.class';
 import * as Bee from './classes/bee.class';
 import { Map } from 'app/classes/map.class';
+import { ConfigService } from 'app/config/config.service';
 
 
 @Injectable()
@@ -18,7 +19,7 @@ export class GameService {
     private _running = new BehaviorSubject<boolean>(true);
     gameLoopEvent$ = this._elapsedMs.asObservable();
     stateChangeEvent$ = this._running.asObservable();
-    constructor() {
+    constructor(private _configService: ConfigService) {
         this.saveTime = Date.now();
         //this.lastTime = this.saveTime - Date.now();
         this.stepTimeMs = 1000;
@@ -35,9 +36,9 @@ export class GameService {
         this.stepTimeMs = savedState && savedState.stepTimeMs || 1000;
 
         if (savedState && savedState.map) {
-            this.map = new Map(this.stepTimeMs, savedState.map);
+            this.map = new Map(this._configService, this.stepTimeMs, savedState.map);
         } else {
-            this.map = new Map(this.stepTimeMs, null);
+            this.map = new Map(this._configService, this.stepTimeMs, null);
         }
         this.gameLoop(0);
     }
