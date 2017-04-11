@@ -1,21 +1,21 @@
 import { ResourceID } from 'app/config/resourceTypes.config';
-export type AbilityID = 'DEF' | 'RNG' |
-    'STR_POLLEN' | 'STR_NECTAR' | 'STR_WATER' |
-    'SPD_FLY' | 'SPD_CLT' | 'SPD_DEP' |
-    'PRD_HONEY' | 'YLD_HONEY' | 'COST_HONEY_NECTAR' |
-    'PRD_WAX' | 'YLD_WAX' | 'COST_WAX_FOOD' |
-    'PRD_JELLY' | 'YLD_JELLY' | 'COST_JELLY_HONEY' | 'COST_JELLY_POLLEN' |
-    'PRD_FOOD' | 'YLD_FOOD' | 'COST_FOOD_POLLEN' | 'COST_FOOD_HONEY' | 'COST_FOOD_WATER' | 'COST_FOOD_DEADBEES' |
-    'PRD_EGG';
+export type AbilityID = 'def' | 'rng' |
+    'str_pollen' | 'str_nectar' | 'str_water' |
+    'spd_fly' | 'spd_clt' | 'spd_dep' |
+    'prd_honey' | 'yld_honey' | 'cost_honey_nectar' |
+    'prd_wax' | 'yld_wax' | 'cost_wax_food' |
+    'prd_jelly' | 'yld_jelly' | 'cost_jelly_honey' | 'cost_jelly_pollen' |
+    'prd_food' | 'yld_food' | 'cost_food_pollen' | 'cost_food_honey' | 'cost_food_water' | 'cost_food_deadbees' |
+    'prd_egg';
 export const AbilityID = {
-    DEF: 'DEF' as AbilityID, RNG: 'RNG' as AbilityID,
-    STR_POLLEN: 'STR_POLLEN' as AbilityID, STR_NECTAR: 'STR_NECTAR' as AbilityID, STR_WATER: 'STR_WATER' as AbilityID,
-    SPD_FLY: 'SPD_FLY' as AbilityID, SPD_CLT: 'SPD_CLT' as AbilityID, SPD_DEP: 'SPD_DEP' as AbilityID,
-    PRD_HONEY: 'PRD_HONEY' as AbilityID, YLD_HONEY: 'YLD_HONEY' as AbilityID, COST_HONEY_NECTAR: 'COST_HONEY_NECTAR' as AbilityID,
-    PRD_WAX: 'PRD_WAX' as AbilityID, YLD_WAX: 'YLD_WAX' as AbilityID, COST_WAX_FOOD: 'COST_WAX_FOOD' as AbilityID,
-    PRD_JELLY: 'PRD_JELLY' as AbilityID, YLD_JELLY: 'YLD_JELLY' as AbilityID, COST_JELLY_HONEY: 'COST_JELLY_HONEY' as AbilityID, COST_JELLY_POLLEN: 'COST_JELLY_POLLEN' as AbilityID,
-    PRD_FOOD: 'PRD_FOOD' as AbilityID, YLD_FOOD: 'YLD_FOOD' as AbilityID, COST_FOOD_POLLEN: 'COST_FOOD_POLLEN' as AbilityID, COST_FOOD_HONEY: 'COST_FOOD_HONEY' as AbilityID, COST_FOOD_WATER: 'COST_FOOD_WATER' as AbilityID, COST_FOOD_DEADBEES: 'COST_FOOD_DEADBEES' as AbilityID,
-    PRD_EGG: 'PRD_EGG' as AbilityID,
+    DEF: 'def' as AbilityID, RNG: 'rng' as AbilityID,
+    STR_POLLEN: 'str_pollen' as AbilityID, STR_NECTAR: 'str_nectar' as AbilityID, STR_WATER: 'str_water' as AbilityID,
+    SPD_FLY: 'spd_fly' as AbilityID, SPD_CLT: 'spd_clt' as AbilityID, SPD_DEP: 'spd_dep' as AbilityID,
+    PRD_HONEY: 'prd_honey' as AbilityID, YLD_HONEY: 'yld_honey' as AbilityID, COST_HONEY_NECTAR: 'cost_honey_nectar' as AbilityID,
+    PRD_WAX: 'prd_wax' as AbilityID, YLD_WAX: 'yld_wax' as AbilityID, COST_WAX_FOOD: 'cost_wax_food' as AbilityID,
+    PRD_JELLY: 'prd_jelly' as AbilityID, YLD_JELLY: 'yld_jelly' as AbilityID, COST_JELLY_HONEY: 'cost_jelly_honey' as AbilityID, COST_JELLY_POLLEN: 'cost_jelly_pollen' as AbilityID,
+    PRD_FOOD: 'prd_food' as AbilityID, YLD_FOOD: 'yld_food' as AbilityID, COST_FOOD_POLLEN: 'cost_food_pollen' as AbilityID, COST_FOOD_HONEY: 'cost_food_honey' as AbilityID, COST_FOOD_WATER: 'cost_food_water' as AbilityID, COST_FOOD_DEADBEES: 'cost_food_deadbees' as AbilityID,
+    PRD_EGG: 'prd_egg' as AbilityID,
     Get_STR: function (rid: ResourceID): AbilityID {
         switch (rid) {
             case 'nectar':

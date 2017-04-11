@@ -1,13 +1,13 @@
-import { Hive } from 'app/classes/hive.class';
+import { IHiveState, Hive } from 'app/classes/hive.class';
 import { Grid, IGridConfig } from 'app/classes/hexmap/grid.class';
 import { Point } from 'app/classes/hexmap/point.class';
 import * as Bee from 'app/classes/bee.class';
-import { MapResource } from 'app/classes/map-resource.class';
+import { IMapResourceState, MapResource } from 'app/classes/map-resource.class';
 import { ConfigService } from 'app/config/config.service';
-interface IMapState {
-    hives?: Hive[];
-    mapResources?: MapResource[];
-    grid?: Grid;
+export interface IMapState {
+    hiveStates?: IHiveState[];
+    mapResourceStates?: IMapResourceState[];
+    gridConfig?: IGridConfig;
     currentHiveID?: number;
     selectedHexID?: string;
     canvasLocation?: Point;
@@ -15,6 +15,10 @@ interface IMapState {
 }
 
 interface IMap extends IMapState {
+    hives: Hive[];
+    mapResources: MapResource[];
+    grid: Grid;
+    getState(): IMapState;
     generateInitialMap(): void;
     getHiveByPosition(pos: string): Hive;
     getCurrentHive(): Hive;
@@ -50,12 +54,42 @@ export class Map implements IMap {
         this.mapResources = [];
         this.stepTimeMs = stepTimeMs;
         if (state) {
-
+            this.grid = new Grid(state.gridConfig);
+            for (let h of state.hiveStates) {
+                var hive = new Hive(h, _configService);
+                for (let b of hive.bees) {
+                    for (let nodeid of b.nodeIds)
+                        b.nodes.push(this.grid.GetHexById(nodeid))
+                }
+                this.hives.push(hive);
+            }
+            for (let mr of state.mapResourceStates) {
+                var node = new MapResource(mr);
+                this.mapResources.push(node);
+                this.grid.GetHexById(node.pos).mapResource = node;
+                for (let beeid of node.beeids) {
+                    node.bees.push(this.getBeeById(beeid));
+                }
+            }
         } else {
             this.generateInitialMap();
         }
     }
+    getState(): IMapState {
 
+        var hives: IHiveState[] = [];
+        for (let h of this.hives) hives.push(h.getState());
+
+        var mapResources: IMapResourceState[] = [];
+        for (let mr of this.mapResources) mapResources.push(mr.getState());
+        return {
+            hiveStates: hives,
+            mapResourceStates: mapResources,
+            gridConfig: this.grid.config,
+            currentHiveID: this.currentHiveID,
+            stepTimeMs: this.stepTimeMs
+        };
+    }
     generateInitialMap(): void {
         this.grid = new Grid({
             MAPWIDTH: 7,
@@ -168,10 +202,8 @@ export class Map implements IMap {
             "initialSize": 2,
             "maxSize": 5,
             "beeMutationChance": 0.0025,
-            "pos": position,
-            "resources": this._configService.getDefaultResources(),
-            "buildings": this._configService.getDefaultBuildings()
-        });
+            "pos": position
+        }, this._configService);
         this.hives.push(hive);
         return hive;
     }

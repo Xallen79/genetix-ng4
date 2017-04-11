@@ -2,8 +2,9 @@ import * as Bee from './bee.class';
 import { Building } from '../config/buildingTypes.config';
 import { Resource } from '../config/resourceTypes.config';
 import { Map } from 'app/classes/map.class';
+import { ConfigService } from 'app/config/config.service';
 
-interface IHiveState {
+export interface IHiveState {
     id: number;
     pos?: string;
     initialSize: number;
@@ -11,12 +12,14 @@ interface IHiveState {
     newbornLimit?: number;
     beeMutationChance?: number;
     nextId?: number;
-    bees?: Bee.BaseBee[];
-    resources?: Resource[]
-    buildings?: Building[]
+    beeStates?: Bee.IBeeState[];
+    resources?: Resource[];
+    buildings?: Building[];
 
 }
 interface IHive extends IHiveState {
+    bees: Bee.BaseBee[];
+    getState(): IHiveState;
     update(state: IHiveState): void;
     getBeesByType(type: Bee.BeeTypes): Bee.BaseBee[];
     getBeeById(id: string): Bee.BaseBee;
@@ -43,7 +46,7 @@ export class Hive implements IHive {
     resources: Resource[];
     buildings: Building[];
 
-    constructor(state: IHiveState) {
+    constructor(state: IHiveState, private _configService: ConfigService) {
         this.update(state);
     }
 
@@ -55,7 +58,7 @@ export class Hive implements IHive {
         this.pos = state.pos || this.pos || 'A1';
         this.newbornLimit = state.newbornLimit || this.newbornLimit || 5;
         this.beeMutationChance = state.beeMutationChance || this.beeMutationChance || 0.005;
-        if (state.bees != null)
+        if (state.beeStates != null)
             this.loadBees(state);
         else {
             this.bees = this.bees || [];
@@ -73,7 +76,22 @@ export class Hive implements IHive {
             this.buildings = state.buildings;
         }
     }
-
+    getState(): IHiveState {
+        var beeStates: Bee.IBeeState[] = [];
+        for (let bee of this.bees) beeStates.push(bee.getState());
+        return {
+            id: this.id,
+            pos: this.pos,
+            initialSize: this.initialSize,
+            maxSize: this.maxSize,
+            newbornLimit: this.newbornLimit,
+            beeMutationChance: this.beeMutationChance,
+            nextId: this.nextId,
+            beeStates: beeStates,
+            resources: this.resources,
+            buildings: this.buildings
+        };
+    }
     getBeesByType(type: Bee.BeeTypes): Bee.BaseBee[] {
         return this.bees.filter(bee => bee.beetype === type);
     }
@@ -90,7 +108,7 @@ export class Hive implements IHive {
 
     loadBees(state: IHiveState): void {
         this.bees = [];
-        for (let bee of state.bees) {
+        for (let bee of state.beeStates) {
             switch (bee.beetype) {
                 case Bee.BeeTypes.QUEEN:
                     this.bees.push(new Bee.Queen(bee));
@@ -124,11 +142,23 @@ export class Hive implements IHive {
         this.bees.push(queen);
     }
     updateResources(state: IHiveState): void {
-
+        if (state.resources == null)
+            this.resources = this._configService.getDefaultResources();
+        else {
+            this.resources = [];
+            for (let r of state.resources)
+                this.resources.push(new Resource(r));
+        }
     }
 
     updateBuildings(state: IHiveState): void {
-
+        if (state.buildings == null)
+            this.buildings = this._configService.getDefaultBuildings();
+        else {
+            this.buildings = [];
+            for (let b of state.buildings)
+                this.buildings.push(new Building(b));
+        }
     }
 
     getNextId(): string {

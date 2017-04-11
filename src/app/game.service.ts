@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Hive } from 'app/classes/hive.class';
 import * as Bee from './classes/bee.class';
-import { Map } from 'app/classes/map.class';
+import { IMapState, Map } from 'app/classes/map.class';
 import { ConfigService } from 'app/config/config.service';
 
 
@@ -68,10 +68,11 @@ export class GameService {
             saveTime: this.saveTime,
             lastTime: this.lastTime,
             stepTimeMs: this.stepTimeMs,
-            map: this.map
+            map: this.map.getState()
         };
+        console.log(state);
         var save = LZString.compressToBase64(JSON.stringify(state));
-        console.log(save);
+        //console.log(save);
         this.lastSave = save;
         localStorage.setItem(this.gameSaveKey, save);
     }

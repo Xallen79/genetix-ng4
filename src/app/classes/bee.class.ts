@@ -7,7 +7,7 @@ import { Hive } from "app/classes/hive.class";
 
 import { Map } from "app/classes/map.class";
 
-interface IBeeState {
+export interface IBeeState {
     id: string;
     beetype?: BeeTypes;
     pos?: string;
@@ -34,6 +34,7 @@ interface IBeeState {
 }
 interface IBee extends IBeeState {
     update(state?: IBeeState): void;
+    getState(): IBeeState;
     die(): void;
     mature(type: BeeTypes): BaseBee;
     hatch(type: BeeTypes): BaseBee;
@@ -61,6 +62,32 @@ export const BeeTypes = {
 
 };
 export abstract class BaseBee implements IBee {
+    getState(): IBeeState {
+        return {
+            id: this.id,
+            beetype: this.beetype,
+            pos: this.pos,
+            tripStart: this.tripStart,
+            tripEnd: this.tripEnd,
+            tripElaspedTime: this.tripElaspedTime,
+            tripTotalTime: this.tripTotalTime,
+            waitingAtResource: this.waitingAtResource,
+            dt: this.dt,
+            queenParentId: this.queenParentId,
+            droneParentId: this.droneParentId,
+            generation: this.generation,
+            jid: this.jid,
+            action: this.action,
+            msSinceWork: this.msSinceWork,
+            nodeIndex: this.nodeIndex,
+            beeMutationChance: this.beeMutationChance,
+            dead: this.dead,
+            nodeIds: this.nodeIds,
+            traits: this.traits,
+            genome: this.genome
+        };
+    }
+
 
     [propName: string]: any;
     id: string;
@@ -111,7 +138,6 @@ export abstract class BaseBee implements IBee {
         this.nodeIndex = config && config.nodeIndex || this.nodeIndex || 0;
         this.beeMutationChance = config && config.beeMutationChance || this.beeMutationChance || 0.005;
         this.genome = new Genome(config && config.genome || null, this.hasPairs);
-        console.log(this.genome.getGene(0, 0));
         this.name = this.beetype + this.id;
     }
 

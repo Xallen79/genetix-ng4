@@ -1,5 +1,5 @@
 import * as Bee from './bee.class';
-interface IMapResourceState {
+export interface IMapResourceState {
     id: number;
     level?: number;
     pos: string;
@@ -17,12 +17,13 @@ interface IMapResourceState {
     harvestMultiplier?: number;
     beeIsHarvesting?: boolean;
     resourceName: string;
-    beeids?: number[];
+    beeids?: string[];
 }
 
 interface IMapResource extends IMapResourceState {
     bees: Bee.BaseBee[];
     name: string;
+    getState(): IMapResourceState;
     queueHarvest(bee: Bee.BaseBee): void;
     processElapsedTime(ms: number): void;
     doneHarvesting(): void;
@@ -49,7 +50,7 @@ export class MapResource implements IMapResource {
     harvestMultiplier: number;
     beeIsHarvesting: boolean;
     resourceName: string;
-    beeids: number[];
+    beeids: string[];
     bees: Bee.BaseBee[];
     name: string;
 
@@ -75,7 +76,28 @@ export class MapResource implements IMapResource {
 
         this.name = this.resourceName + " #" + this.id;
     }
-
+    getState(): IMapResourceState {
+        return {
+            id: this.id,
+            level: this.level,
+            pos: this.pos,
+            dt: this.dt,
+            color: this.color,
+            image: this.image,
+            cooldown: this.cooldown,
+            cooldownRemaining: this.cooldownRemaining,
+            pollen: this.pollen,
+            col_pollen: this.col_pollen,
+            nectar: this.nectar,
+            col_nectar: this.col_nectar,
+            water: this.water,
+            col_water: this.col_water,
+            harvestMultiplier: this.harvestMultiplier,
+            beeIsHarvesting: this.beeIsHarvesting,
+            resourceName: this.resourceName,
+            beeids: this.beeids
+        };
+    }
     queueHarvest(bee: Bee.BaseBee): void {
         //logService.logWorkMessage(bee.name + ' reached ' + this.name);
         bee.waitingAtResource = true;
