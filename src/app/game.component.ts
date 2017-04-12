@@ -11,16 +11,24 @@ import { Subscription } from "rxjs/Subscription";
   styleUrls: ['./game.component.scss']
 })
 export class GameComponent implements OnInit, OnDestroy {
-  hives: Hive[];
+
   title = 'GenetixNg4';
   count: number = 0;
   gameLoopSub: Subscription;
   constructor(private _gameService: GameService, private _logService: LogService) {
   }
   ngOnInit() {
-    this.hives = this._gameService.map.hives;
     this.gameLoopSub = this._gameService.gameLoopEvent$.subscribe(elapsedMs => {
-      while (elapsedMs > 0) { this.count++; elapsedMs -= 1000; if (this.count % 10 === 0) this._logService.logGeneralMessage("Test"); }
+      if (elapsedMs === 0) {
+        this.count = 0;
+        return;
+      }
+      while (elapsedMs >= 50) {
+        this.count++;
+        elapsedMs -= 50;
+        if (this.count % (1000 / 50 * 10) === 0)
+          this._logService.logGeneralMessage("Test");
+      }
     });
   }
 

@@ -27,12 +27,16 @@ export class Resource implements IResourceType {
     desc: string;
     jid: string;
     icon: string;
+    owned: number;
+    max: number;
     constructor(resourceType: IResourceType) {
         this.rid = resourceType.rid;
         this.name = resourceType.name;
         this.desc = resourceType.desc;
         this.jid = resourceType.jid;
         this.icon = resourceType.icon;
+        this.owned = resourceType.owned || 0;
+        this.max = resourceType.max || 0;
 
     }
 }
@@ -92,13 +96,15 @@ export var DEFAULT_RESOURCES: IResourceType[] = [
         name: "Dead bees",
         desc: "Dead bees that take up space, convert them to food.",
         jid: "UNDERTAKER",
-        icon: "icon-tombstone"
+        icon: "icon-tombstone",
+        max: -1
     },
     {
         rid: ResourceID.DEFENSE,
         name: "Defense",
         desc: "Hive defensive ability.",
         jid: "GUARD",
-        icon: "icon-shield"
+        icon: "icon-shield",
+        max: -1
     }
 ]

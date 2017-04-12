@@ -35,6 +35,9 @@ interface IHive extends IHiveState {
 }
 export class Hive implements IHive {
 
+    beeStates: Bee.IBeeState[];
+
+
     id: number;
     pos?: string;
     initialSize: number;
@@ -48,6 +51,7 @@ export class Hive implements IHive {
 
     constructor(state: IHiveState, private _configService: ConfigService) {
         this.update(state);
+
     }
 
     update(state: IHiveState): void {
@@ -65,16 +69,10 @@ export class Hive implements IHive {
             if (this.bees.length === 0) this.createInitialQueen(true);
         }
 
-        if (state.resources == null) {
-            this.updateResources(state);
-        } else {
-            this.resources = state.resources;
-        }
-        if (state.buildings == null) {
-            this.updateBuildings(state);
-        } else {
-            this.buildings = state.buildings;
-        }
+        this.updateResources(state);
+
+        this.updateBuildings(state);
+
     }
     getState(): IHiveState {
         var beeStates: Bee.IBeeState[] = [];
@@ -142,23 +140,31 @@ export class Hive implements IHive {
         this.bees.push(queen);
     }
     updateResources(state: IHiveState): void {
-        if (state.resources == null)
+        if (state.resources == null && this.resources == null)
             this.resources = this._configService.getDefaultResources();
-        else {
+        else if (state.resources != null) {
             this.resources = [];
-            for (let r of state.resources)
+            for (let r of state.resources) {
                 this.resources.push(new Resource(r));
+            }
         }
+        // else do nothing, nothing in the state and this hive already has resources
     }
 
     updateBuildings(state: IHiveState): void {
-        if (state.buildings == null)
+        if (state.buildings == null && this.buildings == null)
             this.buildings = this._configService.getDefaultBuildings();
-        else {
+        else if (state.buildings != null) {
             this.buildings = [];
-            for (let b of state.buildings)
-                this.buildings.push(new Building(b));
+            for (let b of state.buildings) {
+                let building: Building = new Building(b);
+                building.setCanBuild(this.resources);
+                this.buildings.push(building);
+            }
         }
+        // else do nothing, nothing in the state and this hive already has buildings
+
+
     }
 
     getNextId(): string {

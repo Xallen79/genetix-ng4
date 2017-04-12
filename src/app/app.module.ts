@@ -1,4 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { TooltipModule } from 'ngx-bootstrap/tooltip';
+import { ProgressbarModule } from 'ngx-bootstrap/progressbar';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { UIRouterModule, UIView } from "ui-router-ng2";
 import { FormsModule } from '@angular/forms';
@@ -37,6 +39,8 @@ import { GoalListComponent } from './goal-list/goal-list.component';
   ],
   imports: [
     BrowserModule,
+    TooltipModule.forRoot(),
+    ProgressbarModule.forRoot(),
     FormsModule,
     HttpModule,
     UIRouterModule.forRoot({

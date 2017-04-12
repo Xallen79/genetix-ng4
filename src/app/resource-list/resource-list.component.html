@@ -6,8 +6,19 @@
         <div class="resource-list col-xs-12">
             <div class="row" *ngFor="let resource of _gameService.map.getCurrentHive().resources">
                 <div class="col-xs-12 col-sm-3">
-                    <!--<h5 uib-tooltip="{{resource.desc}}">-->
-                    <h5>{{resource.name}}</h5>
+                    <h5 tooltip="{{resource.desc}}" container="body" placement="right">{{resource.name}}</h5>
+                </div>
+                <div class="col-xs-12 col-sm-9">
+                    <div class="progress progress-custom" *ngIf="resource.max !== -1">
+                        <progressbar [max]="resource.max" [value]="resource.owned">
+                            <span class="amounts">{{resource.owned}} / {{resource.max}}</span>
+                        </progressbar>
+                    </div>
+                    <div class="progress progress-custom" *ngIf="resource.max === -1">
+                        <progressbar [max]="0" [value]="0">
+                            <span class="amounts">{{resource.owned}}</span>
+                        </progressbar>
+                    </div>
                 </div>
                 <!--<div class="col-xs-12 col-sm-9">
                     <div class="progress progress-custom" ng-if="resource.max !== -1">

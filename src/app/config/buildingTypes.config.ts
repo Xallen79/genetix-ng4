@@ -1,4 +1,5 @@
-import { ResourceID } from 'app/config/resourceTypes.config';
+import { ResourceID, DEFAULT_RESOURCES, Resource } from 'app/config/resourceTypes.config';
+import { sprintf } from 'sprintf-js';
 export type BuildingUse = 'housing' | 'storage' | 'nursery';
 export const BuildingUse = {
     HOUSING: 'housing' as BuildingUse,
@@ -41,6 +42,12 @@ interface IBuildingType {
     multiplier: number;
 }
 
+interface INextCost {
+    rid: ResourceID;
+    resourceName: string;
+    amount: number;
+};
+
 export class Building implements IBuildingType {
     bid: BuildingID;
     name: string;
@@ -60,10 +67,18 @@ export class Building implements IBuildingType {
     gifted: number;
     unlocked: boolean;
     multiplier: number;
+    canBuild: boolean;
+    private _nextCost: INextCost[];
+    private _calcLevel: number = -1;
+    private _size: number;
+    private _sizeChanged: boolean = true;
     constructor(buildingType: IBuildingType) {
+        var resource = DEFAULT_RESOURCES.find(r => r.rid === buildingType.rid);
+        let obj: any = {};
+        if (resource) obj.resource = resource.name;
         this.bid = buildingType.bid;
-        this.name = buildingType.name;
-        this.description = buildingType.description;
+        this.name = sprintf(buildingType.name, obj);
+        this.description = sprintf(buildingType.description, obj);
         this.use = buildingType.use;
         this.size = buildingType.size;
         this.rid = buildingType.rid;
@@ -72,7 +87,53 @@ export class Building implements IBuildingType {
         this.gifted = buildingType.gifted;
         this.unlocked = buildingType.unlocked;
         this.multiplier = buildingType.multiplier;
+
+        this.canBuild = false;
+        this.getNextCost();
     }
+
+    setCanBuild(resources: Resource[]): boolean {
+
+        for (let cost of this.getNextCost()) {
+            let r: Resource = resources.find(r => r.rid === cost.rid);
+            if (!r || r.owned < cost.amount) {
+
+                this.canBuild = false;
+                return false;
+            }
+        }
+        this.canBuild = true;
+        return true;
+
+    }
+    getNextCost(): INextCost[] {
+        if (this._calcLevel !== this.purchased) {
+            this._nextCost = [];
+            for (let c of this.cost) {
+                let r = DEFAULT_RESOURCES.find(r => r.rid === c.rid);
+                let nextAmount: number = Math.ceil(c.base * Math.pow(1 + (c.percent / 100), this.purchased));
+                this._nextCost.push({ rid: c.rid, resourceName: r.name, amount: nextAmount });
+            }
+            this._calcLevel = this.purchased;
+        }
+        return this._nextCost;
+    }
+    getSize(): number {
+        if (this._sizeChanged) {
+            if (this.gifted + this.purchased > 0)
+                this._size = Math.floor(this.size.base * Math.pow(1 + (this.size.percent / 100), (this.gifted + this.purchased - 1)));
+            else
+                this._size = 0;
+            this._sizeChanged = false;
+        }
+        return this._size;
+    }
+    build(gifted?: boolean) {
+        if (gifted) this.gifted++;
+        else this.purchased++;
+        this._sizeChanged = true;
+    }
+
 }
 
 export var DEFAULT_BUILDINGS: IBuildingType[] = [

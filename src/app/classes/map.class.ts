@@ -71,6 +71,7 @@ export class Map implements IMap {
                     node.bees.push(this.getBeeById(beeid));
                 }
             }
+            this.currentHiveID = state.currentHiveID;
         } else {
             this.generateInitialMap();
         }

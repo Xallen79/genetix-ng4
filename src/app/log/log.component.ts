@@ -31,9 +31,12 @@ export class LogService {
      */
     constructor() {
         this.messages = [];
-        this.logGeneralMessage("Welcome to Genetix!");
+        this.clearLog("Welcome to Genetix!");
     }
-
+    clearLog(initMessage?: string) {
+        this.messages = [];
+        if (initMessage != null) this.logGeneralMessage(initMessage);
+    }
     logGeneralMessage(message) {
         this.messages.push(new LogMessage({ type: LogType.GENERAL, timestamp: Date.now(), message: message }));
         if (this.messages.length > this.maxMessages)
@@ -71,11 +74,11 @@ export class LogService {
     templateUrl: './log.component.html',
 })
 export class LogComponent implements OnInit {
-
+    pauseScroll: boolean;
     constructor(private _logService: LogService) {
     }
     ngOnInit() {
-
+        this.pauseScroll = false;
     }
 
     ngOnDestroy() {
