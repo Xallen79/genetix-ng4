@@ -9,18 +9,21 @@
     <div class="player-content">
         <div class="row map-container">
             <div class="row map-container" style="overflow: hidden;  position: relative;">
-                <!--<span ng-hide="$ctrl.loadPercent == 100" ng-bind="('Loading: ' + $ctrl.loadPercent + '%')"></span>-->
-                <div class="pull-left">
-                    <span>ID <input type="checkbox" [(ngModel)]="_gameService.map.grid.config.SHOW_HEX_ID" /></span>
-                    <span>XY <input type="checkbox" [(ngModel)]="_gameService.map.grid.config.SHOW_HEX_XY" /></span>
+                <span *ngIf="!imagesLoaded">Loading...<i class="fa fa-spinner fa-spin"></i></span>
+                <div [hidden]="!imagesLoaded">
+                    <!--<span id="beeimg"></span>-->
+                    <div class="pull-left">
+                        <span>ID <input type="checkbox" [(ngModel)]="_gameService.map.grid.config.SHOW_HEX_ID" /></span>
+                        <span>XY <input type="checkbox" [(ngModel)]="_gameService.map.grid.config.SHOW_HEX_XY" /></span>
+                    </div>
+                    <div class="btn-group pull-right" style="z-index: 100;" role="group">
+                        <div class="btn btn-sm btn-info" (click)="resetZoom()"><i class="fa fa-arrows-alt"></i></div>
+                        <div class="btn btn-sm btn-info" (click)="zoomOut()"><i class="fa fa-minus"></i></div>
+                        <div class="btn btn-sm btn-info" (click)="zoomIn()"><i class="fa fa-plus"></i></div>
+                    </div>
+                    <!--<canvas ng-show="$ctrl.loadPercent == 100" id="map" style="position:absolute;top:0px;left:0px;" lvl-drop-target="true" on-drag-start="$ctrl.onDragStart(dragId)" on-drag-stop="$ctrl.onDragStop()" on-drop="$ctrl.dropped(dragId, dropId, relativePos)"></canvas>-->
+                    <canvas id="map" style="position:absolute;top:0px;left:0px;"></canvas>
                 </div>
-                <div class="btn-group pull-right" style="z-index: 100;" role="group">
-                    <div class="btn btn-sm btn-info" (click)="resetZoom()"><i class="fa fa-arrows-alt"></i></div>
-                    <div class="btn btn-sm btn-info" (click)="zoomOut()"><i class="fa fa-minus"></i></div>
-                    <div class="btn btn-sm btn-info" (click)="zoomIn()"><i class="fa fa-plus"></i></div>
-                </div>
-                <!--<canvas ng-show="$ctrl.loadPercent == 100" id="map" style="position:absolute;top:0px;left:0px;" lvl-drop-target="true" on-drag-start="$ctrl.onDragStart(dragId)" on-drag-stop="$ctrl.onDragStop()" on-drop="$ctrl.dropped(dragId, dropId, relativePos)"></canvas>-->
-                <canvas id="map" style="position:absolute;top:0px;left:0px;"></canvas>
             </div>
         </div>
     </div>

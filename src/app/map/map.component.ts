@@ -30,6 +30,7 @@ export class MapComponent implements OnInit, OnDestroy {
   hexsize_min: number = 20;
   hexsize_max: number = 160;
   gameLoopSub: Subscription;
+  imagesLoaded: boolean = false;
   constructor(public _gameService: GameService) {
     this.mapconfig = _gameService.map.grid.config;
   }
@@ -37,8 +38,17 @@ export class MapComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadImages(this._imageList)
       .then((images) => {
-        this.images = images;
+
+        var i = images.reduce(function (total, current) {
+          return total[current.name] = current.image, total;
+        }, {});
+
+        this.images = i;
+        this.imagesLoaded = true;
+
         this.setupCanvas();
+
+        // document.getElementById('beeimg').appendChild(this.images['bee-2.svg']);
       })
       .catch((error) => {
         console.log(error);
@@ -48,15 +58,16 @@ export class MapComponent implements OnInit, OnDestroy {
     this.gameLoopSub.unsubscribe();
   }
 
-  loadImage(imageName: string): Promise<HTMLImageElement> {
+  loadImage(imageName: string): Promise<any> {
     return new Promise((resolve, reject) => {
       let img: HTMLImageElement = new Image(100, 100);
-      resolve(img);
+      img.src = 'assets/images/map/' + imageName;
+      resolve({ name: imageName, image: img });
     });
   }
 
-  loadImages(imageNames: string[]): Promise<HTMLImageElement[]> {
-    let promises: Promise<HTMLImageElement>[] = imageNames.map(this.loadImage);
+  loadImages(imageNames: string[]): Promise<any[]> {
+    let promises: Promise<any>[] = imageNames.map(this.loadImage);
     return Promise.all(promises);
   }
 
