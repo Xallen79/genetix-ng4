@@ -11,31 +11,47 @@ $top-row-height: 25vh;
     background: -webkit-linear-gradient(-45deg, opacify($gray-light, 0.4) 0%, opacify($gray-light, 0.4) 30%, opacify($gray-dark, 0.4) 100%);
 }
 
-@mixin resource-attr-stroke {
-    [data-attr="STR"] {
-        color: $attr-str-dim;
-        @include strokeme($attr-str)
+@mixin resource-stroke {
+    [data-rid="nectar"] {
+        color: $attr-nectar-dim;
+        @include strokeme($attr-nectar)
     }
-    [data-attr="INT"] {
-        color: $attr-int-dim;
-        @include strokeme($attr-int)
+    [data-rid="pollen"] {
+        color: $attr-pollen-dim;
+        @include strokeme($attr-pollen)
     }
-    [data-attr="END"] {
-        color: $attr-end-dim;
-        @include strokeme($attr-end)
+    [data-rid="water"] {
+        color: $attr-water-dim;
+        @include strokeme($attr-water)
     }
-    [data-attr="CHR"] {
-        color: $attr-chr-dim;
-        @include strokeme($attr-chr)
+    [data-rid="food"] {
+        color: $attr-food-dim;
+        @include strokeme($attr-food)
     }
-    [data-attr="LCK"] {
-        color: $attr-lck-dim;
-        @include strokeme($attr-lck)
+    [data-rid="honey"] {
+        color: $attr-honey-dim;
+        @include strokeme($attr-honey)
+    }
+    [data-rid="royal_jelly"] {
+        color: $attr-royal_jelly-dim;
+        @include strokeme($attr-royal_jelly)
+    }
+    [data-rid="wax"] {
+        color: $attr-wax-dim;
+        @include strokeme($attr-wax)
+    }
+    [data-rid="deadbees"] {
+        color: $attr-deadbees-dim;
+        @include strokeme($attr-deadbees)
+    }
+    [data-rid="defense"] {
+        color: $attr-defense-dim;
+        @include strokeme($attr-defense)
     }
 }
 
 i.text-success {
-    color: $attr-str;
+    color: $attr-defense;
     @include strokeme($brand-success-dark)
 }
 
@@ -192,7 +208,7 @@ h5 {
 
 .population-list {
     .mortal-name {
-        @include resource-attr-stroke();
+        @include resource-stroke();
         font-size: .8vw;
         padding: 3px;
     }
@@ -296,6 +312,8 @@ div.genes-td.rec {
     padding-right: 5px;
 }
 
+
+/*
 table.genomeEditor {
     //margin-top: .1vh;
     //margin-bottom: .1vh;
@@ -327,15 +345,13 @@ table.genomeEditor {
         min-width: 100%;
     }
 }
+*/
 
-.trait-tooltip,
-.perk-tooltip,
-.achievement-tooltip,
-.building-tooltip {
+.tooltip {
     p {
         margin: 3px;
     }
-    @include resource-attr-stroke();
+    @include resource-stroke();
     h5 {
         margin: 3px;
         color: lightblue;
@@ -351,50 +367,49 @@ table.genomeEditor {
     overflow-x: hidden;
 }
 
-.achievement-list {
-    margin: 5px;
-    padding: 2px;
-    //border: 1px solid black;
-    //background-color: $gray;
-    .achievement-rank-row {
-        @include maximize-row();
-    }
-    .achievement-cell,
-    .achievement-rank-cell {
-        border: 1px solid black;
-        padding: 2px;
-        min-height: 30px;
-        font-size: .75vw;
-    }
-    .achievement-cell {
-        @include linear-gradient(180deg, $gray-dark 15%, black 100%);
-        padding: 5px;
-        margin: 2px;
-    }
-    .achievement-rank-cell {
-        line-height: 1.1vw;
-        padding: 2px;
-        margin-bottom: 3px;
-        @include linear-gradient(135deg, $gray-light 0%, $gray-dark 30%, $gray-dark 100%);
-        text-align: center;
-    }
-    .achievement-rank-STR {
-        @include linear-gradient(180deg, $attr-str 15%, black 100%)
-    }
-    .achievement-rank-INT {
-        @include linear-gradient(180deg, $attr-int 15%, black 100%)
-    }
-    .achievement-rank-END {
-        @include linear-gradient(180deg, $attr-end 15%, black 100%)
-    }
-    .achievement-rank-CHR {
-        @include linear-gradient(180deg, $attr-chr 15%, black 100%)
-    }
-    .achievement-rank-LCK {
-        @include linear-gradient(180deg, $attr-lck 15%, black 100%)
-    }
-}
-
+// .achievement-list {
+//     margin: 5px;
+//     padding: 2px;
+//     //border: 1px solid black;
+//     //background-color: $gray;
+//     .achievement-rank-row {
+//         @include maximize-row();
+//     }
+//     .achievement-cell,
+//     .achievement-rank-cell {
+//         border: 1px solid black;
+//         padding: 2px;
+//         min-height: 30px;
+//         font-size: .75vw;
+//     }
+//     .achievement-cell {
+//         @include linear-gradient(180deg, $gray-dark 15%, black 100%);
+//         padding: 5px;
+//         margin: 2px;
+//     }
+//     .achievement-rank-cell {
+//         line-height: 1.1vw;
+//         padding: 2px;
+//         margin-bottom: 3px;
+//         @include linear-gradient(135deg, $gray-light 0%, $gray-dark 30%, $gray-dark 100%);
+//         text-align: center;
+//     }
+//     .achievement-rank-STR {
+//         @include linear-gradient(180deg, $attr-str 15%, black 100%)
+//     }
+//     .achievement-rank-INT {
+//         @include linear-gradient(180deg, $attr-int 15%, black 100%)
+//     }
+//     .achievement-rank-END {
+//         @include linear-gradient(180deg, $attr-end 15%, black 100%)
+//     }
+//     .achievement-rank-CHR {
+//         @include linear-gradient(180deg, $attr-chr 15%, black 100%)
+//     }
+//     .achievement-rank-LCK {
+//         @include linear-gradient(180deg, $attr-lck 15%, black 100%)
+//     }
+// }
 .progress.progress-custom {
     position: relative;
     border: 1px solid black;
@@ -449,57 +464,97 @@ table.genomeEditor {
     }
 }
 
-div[data-attr="STR"] {
+div[data-rid="nectar"] {
     .progress {
-        background-color: $attr-str-dim;
+        background-color: $attr-nectar-dim;
     }
     .progress-bar {
-        background-color: $attr-str;
+        background-color: $attr-nectar;
         @include strokeme(black)
     }
 }
 
-div[data-attr="INT"] {
+div[data-rid="pollen"] {
     .progress {
-        background-color: $attr-int-dim;
+        background-color: $attr-pollen-dim;
     }
     .progress-bar {
-        background-color: $attr-int;
+        background-color: $attr-pollen;
         @include strokeme(black)
     }
 }
 
-div[data-attr="END"] {
+div[data-rid="water"] {
     .progress {
-        background-color: $attr-end-dim;
+        background-color: $attr-water-dim;
     }
     .progress-bar {
-        background-color: $attr-end;
+        background-color: $attr-water;
         @include strokeme(black)
     }
 }
 
-div[data-attr="CHR"] {
+div[data-rid="food"] {
     .progress {
-        background-color: $attr-chr-dim;
+        background-color: $attr-food-dim;
     }
     .progress-bar {
-        background-color: $attr-chr;
-        @include strokeme(black);
+        background-color: $attr-food;
+        @include strokeme(black)
     }
 }
 
-div[data-attr="LCK"] {
+div[data-rid="honey"] {
     .progress {
-        background-color: $attr-lck-dim;
+        background-color: $attr-honey-dim;
     }
     .progress-bar {
-        background-color: $attr-lck;
-        @include strokeme($attr-lck)
+        background-color: $attr-honey;
+        @include strokeme(black)
     }
 }
 
-div[data-attr="NONE"] {
+div[data-rid="royal_jelly"] {
+    .progress {
+        background-color: $attr-royal_jelly-dim;
+    }
+    .progress-bar {
+        background-color: $attr-royal_jelly;
+        @include strokeme(black)
+    }
+}
+
+div[data-rid="wax"] {
+    .progress {
+        background-color: $attr-wax-dim;
+    }
+    .progress-bar {
+        background-color: $attr-wax;
+        @include strokeme(black)
+    }
+}
+
+div[data-rid="deadbees"] {
+    .progress {
+        background-color: $attr-deadbees-dim;
+    }
+    .progress-bar {
+        background-color: $attr-deadbees;
+        @include strokeme(black)
+    }
+}
+
+div[data-rid="defense"] {
+    .progress {
+        background-color: $attr-defense-dim;
+    }
+    .progress-bar {
+        background-color: $attr-defense;
+        @include strokeme(black)
+    }
+}
+
+div[data-rid="NONE"] {
     .progress {
         background-color: $attr-none-dim;
     }

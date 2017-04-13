@@ -1,4 +1,4 @@
-import { ResourceID, DEFAULT_RESOURCES, Resource } from 'app/config/resourceTypes.config';
+import { ResourceID, DEFAULT_RESOURCES, Resource, IResourceType } from 'app/config/resourceTypes.config';
 import { sprintf } from 'sprintf-js';
 export type BuildingUse = 'housing' | 'storage' | 'nursery';
 export const BuildingUse = {
@@ -43,8 +43,7 @@ interface IBuildingType {
 }
 
 interface INextCost {
-    rid: ResourceID;
-    resourceName: string;
+    resource: IResourceType;
     amount: number;
 };
 
@@ -95,7 +94,7 @@ export class Building implements IBuildingType {
     setCanBuild(resources: Resource[]): boolean {
 
         for (let cost of this.getNextCost()) {
-            let r: Resource = resources.find(r => r.rid === cost.rid);
+            let r: Resource = resources.find(r => r.rid === cost.resource.rid);
             if (!r || r.owned < cost.amount) {
 
                 this.canBuild = false;
@@ -112,7 +111,7 @@ export class Building implements IBuildingType {
             for (let c of this.cost) {
                 let r = DEFAULT_RESOURCES.find(r => r.rid === c.rid);
                 let nextAmount: number = Math.ceil(c.base * Math.pow(1 + (c.percent / 100), this.purchased));
-                this._nextCost.push({ rid: c.rid, resourceName: r.name, amount: nextAmount });
+                this._nextCost.push({ resource: r, amount: nextAmount });
             }
             this._calcLevel = this.purchased;
         }

@@ -10,7 +10,7 @@ export const ResourceID = {
     DEADBEES: 'deadbees' as ResourceID,
     DEFENSE: 'defense' as ResourceID
 }
-interface IResourceType {
+export interface IResourceType {
     rid: ResourceID;
     name: string;
     desc: string;

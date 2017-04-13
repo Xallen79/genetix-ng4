@@ -6,6 +6,7 @@ import * as Bee from './classes/bee.class';
 import { IMapState, Map } from 'app/classes/map.class';
 import { ConfigService } from 'app/config/config.service';
 import { LogService } from 'app/log/log.component';
+import { ResourceID } from "app/config/resourceTypes.config";
 
 
 @Injectable()
@@ -92,5 +93,9 @@ export class GameService {
     hardReset() {
         localStorage.removeItem(this.gameSaveKey);
         this.initGame();
+    }
+
+    getResourceType(rid: ResourceID) {
+        return this._configService.getResourceById(rid);
     }
 }

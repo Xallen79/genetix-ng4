@@ -4,7 +4,7 @@
     </h3>
     <div class="player-content">
         <div class="resource-list col-xs-12">
-            <div class="row" *ngFor="let resource of _gameService.map.getCurrentHive().resources">
+            <div class="row" *ngFor="let resource of _gameService.map.getCurrentHive().resources" [attr.data-rid]="resource.rid">
                 <div class="col-xs-12 col-sm-3">
                     <h5 tooltip="{{resource.desc}}" container="body" placement="right">{{resource.name}}</h5>
                 </div>

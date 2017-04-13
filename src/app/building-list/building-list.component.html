@@ -6,26 +6,27 @@
         <div class="building-list col-xs-12">
             <div class="scalable-list-button-big" *ngFor="let building of _gameService.map.getCurrentHive().buildings">
                 <div *ngIf="building.getNextCost().length > 0">
-                    <div placement="bottom" [tooltip]="costTooltip" container="body">
+                    <div placement="bottom" [tooltip]="costTooltip" container="body" #tool="bs-tooltip" triggers="" (click)="tool.toggle()">
                         <button type="button" [disabled]="!building.canBuild" class="btn btn-xs btn-primary" ngClick="_gameServe.map.getCurrentHive().build(building)">
                             {{(building.name + ' (' + (building.gifted + building.purchased) + ')')}}
                         </button>
                     </div>
                 </div>
                 <ng-template #costTooltip>
-                    <div class="building-tooltip" style="text-align: left;">
-                        <h5>{{building.description}}</h5>
-                        <span>Requires: </span>
-                        <p style="white-space:nowrap">
 
+                    <div style="text-align: left;">
+                        <h5>{{building.description}}</h5>
+
+                        <p style="white-space:nowrap">
+                            <span>Requires: </span>
                             <span *ngFor="let cost of building.getNextCost()">
-                                <!--<i class="fa" ng-class="$ctrl.resourceTypes[cost.rid].icon"></i>-->
+                                <i class="fa" [ngClass]="cost.resource.icon" [attr.data-rid]="cost.resource.rid"></i>
                                 <!--data-attr="{{$ctrl.resourceTypes[cost.rid].attr}}"-->
                                 <span>{{cost.amount}}</span>
-                            <span>{{cost.resourceName}}</span>
                             </span>
                         </p>
                     </div>
+
                 </ng-template>
             </div>
         </div>

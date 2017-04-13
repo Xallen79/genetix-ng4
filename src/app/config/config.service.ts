@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ITrait, Trait, DEFAULT_TRAITS } from './traits.config';
 import { Building, DEFAULT_BUILDINGS } from './buildingTypes.config';
-import { Resource, DEFAULT_RESOURCES } from './resourceTypes.config';
+import { Resource, DEFAULT_RESOURCES, ResourceID } from './resourceTypes.config';
 
 @Injectable()
 export class ConfigService {
@@ -56,6 +56,9 @@ export class ConfigService {
     }
     getDefaultResources(): Resource[] {
         return Object.assign([], this.RESOURCES);
+    }
+    getResourceById(rid: ResourceID) {
+        return this.RESOURCES.find(r => r.rid === rid);
     }
 
 }
