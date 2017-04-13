@@ -7,7 +7,7 @@ import { GameService } from 'app/game.service';
 })
 export class ResourceListComponent implements OnInit {
 
-    constructor(private _gameService: GameService) { }
+    constructor(public _gameService: GameService) { }
 
     ngOnInit() {
 

@@ -24,7 +24,7 @@ interface IHexagon {
     PathCoOrdX: number;
     PathCoOrdY: number;
     Relocate(config: IHexagonConfig): void;
-    draw(context: CanvasRenderingContext2D): void;
+    draw(context: CanvasRenderingContext2D, SHOW_HEX_ID: boolean, SHOW_HEX_XY: boolean): void;
     isInBounds(x: number, y: number): boolean;
     isInHexBounds(p: Point): boolean;
     Contains(p: Point): boolean;
@@ -82,7 +82,7 @@ export class Hexagon implements IHexagon {
         this.BottomRightPoint = new Point(x + config.WIDTH, y + config.HEIGHT);
         this.MidPoint = new Point(x + (config.WIDTH / 2), y + (config.HEIGHT / 2));
     }
-    draw = function (ctx: CanvasRenderingContext2D): void {
+    draw = function (ctx: CanvasRenderingContext2D, SHOW_HEX_ID: boolean, SHOW_HEX_XY: boolean): void {
 
         if (this.selected)
             ctx.fillStyle = "#7283BA";
@@ -106,7 +106,7 @@ export class Hexagon implements IHexagon {
 
 
 
-        if (this.id && (this.config.SHOW_HEX_ID || this.config.SHOW_HEX_XY)) {
+        if (this.id && (SHOW_HEX_ID || SHOW_HEX_XY)) {
             //draw text for debugging
             ctx.fillStyle = "black";
             ctx.font = "bolder 8pt Trebuchet MS,Tahoma,Verdana,Arial,sans-serif";
@@ -114,8 +114,8 @@ export class Hexagon implements IHexagon {
             ctx.textBaseline = 'middle';
             //var textWidth = ctx.measureText(this.Planet.BoundingHex.id);
             var msg = '';
-            if (this.config.SHOW_HEX_ID) msg += this.id + ' ';
-            if (this.config.SHOW_HEX_XY) msg += this.row + ',' + this.col;
+            if (SHOW_HEX_ID) msg += this.id + ' ';
+            if (SHOW_HEX_XY) msg += this.row + ',' + this.col;
             ctx.fillText(msg, this.MidPoint.X, this.MidPoint.Y);
         }
 

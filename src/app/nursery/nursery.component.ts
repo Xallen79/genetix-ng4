@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { GameService } from 'app/game.service';
 
 @Component({
   selector: 'bloqhead-nursery-list',
@@ -7,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class NurseryComponent implements OnInit {
 
-  constructor() { }
+  constructor(public _gameService: GameService) { }
 
   ngOnInit() {
   }

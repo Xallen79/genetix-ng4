@@ -14,7 +14,7 @@ import { Subscription } from "rxjs/Subscription";
 export class GameControl implements OnInit {
     RUNNING: boolean;
     stateSub: Subscription;
-    constructor(private _gameService: GameService) { }
+    constructor(public _gameService: GameService) { }
     ngOnInit() {
         this.stateSub = this._gameService.stateChangeEvent$.subscribe(state => this.RUNNING = state);
     }

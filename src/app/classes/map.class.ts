@@ -257,7 +257,7 @@ export class Map implements IMap {
     }
     drawHexes(context: CanvasRenderingContext2D): void {
         for (let hex of this.grid.Hexes) {
-            hex.draw(context);
+            hex.draw(context, this.grid.config.SHOW_HEX_ID, this.grid.config.SHOW_HEX_XY);
         }
     }
     drawResources(context: CanvasRenderingContext2D): void {

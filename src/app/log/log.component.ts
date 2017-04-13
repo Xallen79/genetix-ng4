@@ -75,7 +75,7 @@ export class LogService {
 })
 export class LogComponent implements OnInit {
     pauseScroll: boolean;
-    constructor(private _logService: LogService) {
+    constructor(public _logService: LogService) {
     }
     ngOnInit() {
         this.pauseScroll = false;
