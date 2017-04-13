@@ -6,7 +6,8 @@
         <div class="building-list col-xs-12">
             <div class="scalable-list-button-big" *ngFor="let building of _gameService.map.getCurrentHive().buildings">
                 <div *ngIf="building.getNextCost().length > 0">
-                    <div placement="bottom" [tooltip]="costTooltip" container="body" #tool="bs-tooltip" triggers="" (click)="tool.toggle()">
+                    <!--<div placement="bottom" [tooltip]="costTooltip" container="body" #tool="bs-tooltip" triggers="" (click)="tool.toggle()">-->
+                    <div placement="bottom" [tooltip]="costTooltip" container="body">
                         <button type="button" [disabled]="!building.canBuild" class="btn btn-xs btn-primary" ngClick="_gameServe.map.getCurrentHive().build(building)">
                             {{(building.name + ' (' + (building.gifted + building.purchased) + ')')}}
                         </button>

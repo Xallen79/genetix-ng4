@@ -9,7 +9,7 @@
         "test": "ng test",
         "lint": "ng lint",
         "e2e": "ng e2e",
-        "build-prod": "ng build --prod --base-href \"https://xallen79.github.io/genetix-ng4\"",
+        "build-prod": "ng build --prod --base-href \"https://xallen79.github.io/genetix-ng4/\"",
         "deploy": "ngh"
     },
     "private": true,
