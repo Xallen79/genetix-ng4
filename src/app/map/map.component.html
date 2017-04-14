@@ -1,8 +1,11 @@
 <div class="player-box">
     <h3 class="box-title">
         <div class="row">
-            <div class="col-xs-5">
+            <div class="col-xs-12">
                 <i class="fa fa-map"></i> Map
+                <div class="pull-right">
+                    {{fps|number:'1.2-2'}} FPS
+                </div>
             </div>
         </div>
     </h3>
@@ -21,6 +24,7 @@
                         <div class="btn btn-sm btn-info" (click)="zoomOut()"><i class="fa fa-minus"></i></div>
                         <div class="btn btn-sm btn-info" (click)="zoomIn()"><i class="fa fa-plus"></i></div>
                     </div>
+
                     <!--<canvas ng-show="$ctrl.loadPercent == 100" id="map" style="position:absolute;top:0px;left:0px;" lvl-drop-target="true" on-drag-start="$ctrl.onDragStart(dragId)" on-drag-stop="$ctrl.onDragStop()" on-drop="$ctrl.dropped(dragId, dropId, relativePos)"></canvas>-->
                     <canvas id="map" style="position:absolute;top:0px;left:0px;"></canvas>
                 </div>

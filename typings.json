@@ -1,5 +1,8 @@
 {
   "globalDependencies": {
     "sprintf-js": "registry:dt/sprintf-js#0.0.0+20160510002910"
+  },
+  "dependencies": {
+    "lz-string": "registry:dt/lz-string#1.3.0+20161215183019"
   }
 }

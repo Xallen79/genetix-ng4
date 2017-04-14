@@ -31,8 +31,11 @@ export class MapComponent implements OnInit, OnDestroy {
   hexsize_max: number = 160;
   gameLoopSub: Subscription;
   imagesLoaded: boolean = false;
+  fps: number = 0;
+  smoothing: number = 0.99;
   constructor(public _gameService: GameService) {
     this.mapconfig = _gameService.map.grid.config;
+
   }
 
   ngOnInit() {
@@ -81,7 +84,13 @@ export class MapComponent implements OnInit, OnDestroy {
     document.addEventListener('mouseup', (event) => { this.mouseup(event); }, false);
     this.canvas.addEventListener('click', (event) => { this.click(event); }, false);
 
-    this.gameLoopSub = this._gameService.gameLoopEvent$.subscribe(elapsedMs => {
+    this.gameLoopSub = this._gameService.animationEvent$.subscribe(elapsedMs => {
+      console.log(elapsedMs);
+      if (elapsedMs > 0) {
+        var instantFps = 1 / (elapsedMs / 1000);
+        if (this.fps === 0) this.fps = instantFps;
+        this.fps = (this.fps * this.smoothing) + (instantFps * (1.0 - this.smoothing));
+      }
       this.draw();
     });
 
