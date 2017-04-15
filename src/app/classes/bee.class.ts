@@ -32,6 +32,8 @@ export interface IBeeState {
     abilities?: Ability[];
     name?: string;
     genome?: Genome;
+    isMoving?: boolean;
+    harvesting?: boolean;
 }
 interface IBee extends IBeeState {
     job: JobType;
@@ -93,7 +95,8 @@ export abstract class BaseBee implements IBee {
     job: JobType;
     hasPairs: boolean;
     nodes: Hexagon[];
-    isMoving: boolean;
+    isMoving?: boolean;
+    harvesting?: boolean;
 
     private _configService: ConfigService;
 
@@ -119,6 +122,9 @@ export abstract class BaseBee implements IBee {
         this.msSinceWork = config && config.msSinceWork || this.msSinceWork || 0;
         this.dead = (config && config.dead != null) ? config.dead : this.dead != null ? this.dead : false;
         this.nodeIds = config && config.nodeIds || this.nodeIds || [];
+        this.isMoving = config && config.isMoving || false;
+        this.harvesting = config && config.harvesting || false;
+
         //this.nodes = this.nodes || [];
         this.nodeIndex = config && config.nodeIndex || this.nodeIndex || 0;
         this.beeMutationChance = config && config.beeMutationChance || this.beeMutationChance || 0.005;
@@ -150,7 +156,9 @@ export abstract class BaseBee implements IBee {
             nodeIds: this.nodeIds,
             traits: this.traits,
             abilities: this.abilities,
-            genome: this.genome
+            genome: this.genome,
+            isMoving: this.isMoving,
+            harvesting: this.harvesting
         };
     }
 
