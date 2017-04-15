@@ -2,19 +2,19 @@ import { Injectable } from '@angular/core';
 import { ITrait, Trait, DEFAULT_TRAITS } from './traits.config';
 import { Building, DEFAULT_BUILDINGS } from './buildingTypes.config';
 import { Resource, DEFAULT_RESOURCES, ResourceID } from './resourceTypes.config';
+import { Genome } from 'app/classes/genome.class';
+import { Ability, DEFAULT_ABILITIES } from "app/config/abilities.config";
 
 @Injectable()
 export class ConfigService {
     private TRAITS: Trait[];
-    private BUILDINGS: Building[];
-    private RESOURCES: Resource[];
+
     private checked: string[];
 
     constructor() {
         this.buildTraits();
         console.log(this.TRAITS);
-        this.setDefaultBuildings();
-        this.setDefaultResources();
+
     }
     private getRequiredGenesRecursive(trait: ITrait) {
         if (trait.requiredTraits != null) {
@@ -37,28 +37,58 @@ export class ConfigService {
         }
 
     }
-    private setDefaultBuildings(): void {
-        this.BUILDINGS = [];
-        for (let b of DEFAULT_BUILDINGS) this.BUILDINGS.push(new Building(b));
 
-    }
-    private setDefaultResources(): void {
-        this.RESOURCES = [];
-        for (let r of DEFAULT_RESOURCES) this.RESOURCES.push(new Resource(r));
-    }
+    getTraits(genome: Genome): Trait[] {
+        let ret: Trait[] = [];
+        for (let trait of this.TRAITS) {
+            let met: boolean = true;
+            for (let gene of trait.genes) {
+                let on: boolean = genome.getGene(gene.chromosome, gene.gene);
+                if (on !== gene.value)
+                    met = false;
+            }
 
-    getTraits(): Trait[] {
-        return Object.assign([], this.TRAITS);
-    }
+            if (met) {
+                ret.push(Object.assign({}, trait));
+            }
+        }
 
+        return ret;
+    }
+    getAbilities(traits: Trait[]): Ability[] {
+        let ret: Ability[] = DEFAULT_ABILITIES.map(function (a) { return new Ability(a); });
+
+        let modifiers = ret.reduce(function (total, current) {
+            return total[current.abilityId] = {
+                add: 0,
+                percent: 0
+            }, total;
+        }, {});
+
+        for (let trait of traits) {
+            for (let mod of trait.mods) {
+                modifiers[mod.abilityId].add += mod.add || 0;
+                modifiers[mod.abilityId].percent += mod.percent && (mod.percent / 100) || 0;
+            }
+        }
+
+        for (let m in modifiers) {
+            let a = ret.find(r => r.abilityId === m);
+            a.value = a.baseValue;
+            a.value += modifiers[m].add;
+            a.value *= (1 + modifiers[m].percent);
+        }
+
+        return ret;
+    }
     getDefaultBuildings(): Building[] {
-        return Object.assign([], this.BUILDINGS);
+        return DEFAULT_BUILDINGS.map(function (b) { return new Building(b); });
     }
     getDefaultResources(): Resource[] {
-        return Object.assign([], this.RESOURCES);
+        return DEFAULT_RESOURCES.map(function (r) { return new Resource(r); });
     }
     getResourceById(rid: ResourceID) {
-        return this.RESOURCES.find(r => r.rid === rid);
+        return DEFAULT_RESOURCES.find(r => r.rid === rid);
     }
 
 }

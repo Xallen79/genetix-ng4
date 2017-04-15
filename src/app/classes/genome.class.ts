@@ -73,7 +73,7 @@ export class Genome implements IGenome {
     }
     fertilize(mate: IGenome): IGenome {
         var offspring: Genome;
-        var chromosomes: [IChromosomeState[]];
+        var chromosomes: [IChromosomeState[]] = [[]];
         if (!this.hasPairs || !mate.hasPairs)
             throw new Error("Cannot mate genomes with chromosome pairs.");
 
@@ -84,7 +84,7 @@ export class Genome implements IGenome {
         return offspring;
     }
     getEggGenome(): IGenome {
-        var chromosomes: [IChromosome[]];
+        let chromosomes: [IChromosome[]] = [[]];
         for (var i = 0; i < this.chromosomeCount; i++) {
             var p = randomIntFromInterval(0, 1);
             var c = this.chromosomes[p][i];

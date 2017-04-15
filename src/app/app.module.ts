@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { ProgressbarModule } from 'ngx-bootstrap/progressbar';
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA, Injector } from '@angular/core';
 import { UIRouterModule, UIView } from "ui-router-ng2";
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
@@ -54,8 +54,14 @@ import { GoalListComponent } from './goal-list/goal-list.component';
   providers: [GameService, LogService, ConfigService],
   bootstrap: [UIView]
 })
-export class AppModule { }
+export class AppModule {
 
+  constructor(private injector: Injector) {
+    AppInjector = this.injector;
+
+  }
+}
+export let AppInjector: Injector;
 export function randomIntFromInterval(min: number, max: number, func?) {
   if (func == null) func = Math.random;
   return Math.floor(func() * (max - min + 1) + min);

@@ -27,7 +27,7 @@ interface IJobType {
     actions: IJobStep[];
     beetypes: string[];
 }
-interface IJobStep {
+export interface IJobStep {
     action: JobAction;
     rate?: AbilityID;
     storage?(rid: string): AbilityID;
@@ -69,7 +69,7 @@ export var JOB_TYPES: IJobType[] = [{
             action: JobAction.SPAWN,
             rate: AbilityID.PRD_EGG
         }],
-    beetypes: ['worker']
+    beetypes: ['queen']
 
 },
 {

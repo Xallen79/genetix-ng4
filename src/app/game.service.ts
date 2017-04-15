@@ -36,27 +36,30 @@ export class GameService {
         this.lastSave = s;
         var savedState = json ? JSON.parse(json) : null;
         this.saveTime = savedState && savedState.saveTime || now;
+        this.lastTime = null;
+        this.map = null;
         this.stepTimeMs = savedState && savedState.stepTimeMs || 500;
         if (savedState && savedState.map) {
-            this.map = new Map(this._configService, this.stepTimeMs, savedState.map);
+            this.map = new Map(this.stepTimeMs, savedState.map);
         } else {
-            this.map = new Map(this._configService, this.stepTimeMs, null);
+            this.map = new Map(this.stepTimeMs, null);
         }
         this._msSinceAutoSave = 0;
         this._elapsedMs.next(0);
-        this.gameLoop(now - this.saveTime);
+        this._animationRequest = window.requestAnimationFrame(this.gameLoop.bind(this));
 
     }
 
     gameLoop(runningTime) {
         var now = Date.now();
         var diff = now - this.saveTime;
-        this._animationRequest = null;
-        if (this.lastTime == null) this.lastTime = 0;
         this.saveTime = now;
+        this._animationRequest = null;
+        if (this.lastTime == null) this.lastTime = runningTime;
         var steps = 0;
         while (runningTime - this.lastTime >= (this.stepTimeMs * (steps + 1))) {
             steps++;
+
         }
         let elapsedMs: number = (this.stepTimeMs * steps);
         this.lastTime += elapsedMs;

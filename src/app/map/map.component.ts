@@ -85,7 +85,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.canvas.addEventListener('click', (event) => { this.click(event); }, false);
 
     this.gameLoopSub = this._gameService.animationEvent$.subscribe(elapsedMs => {
-      console.log(elapsedMs);
+      //console.log(elapsedMs);
       if (elapsedMs > 0) {
         var instantFps = 1 / (elapsedMs / 1000);
         if (this.fps === 0) this.fps = instantFps;

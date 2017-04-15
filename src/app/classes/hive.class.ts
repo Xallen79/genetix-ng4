@@ -3,6 +3,7 @@ import { Building } from '../config/buildingTypes.config';
 import { Resource } from '../config/resourceTypes.config';
 import { Map } from 'app/classes/map.class';
 import { ConfigService } from 'app/config/config.service';
+import { AppInjector } from "app/app.module";
 
 export interface IHiveState {
     id: number;
@@ -48,8 +49,9 @@ export class Hive implements IHive {
     bees: Bee.BaseBee[];
     resources: Resource[];
     buildings: Building[];
-
-    constructor(state: IHiveState, private _configService: ConfigService) {
+    private _configService: ConfigService;
+    constructor(state: IHiveState) {
+        this._configService = AppInjector.get(ConfigService);
         this.update(state);
 
     }
@@ -113,6 +115,15 @@ export class Hive implements IHive {
                     break;
                 case Bee.BeeTypes.DRONE:
                     this.bees.push(new Bee.Drone(bee));
+                    break;
+                case Bee.BeeTypes.WORKER:
+                    this.bees.push(new Bee.Worker(bee));
+                    break;
+                case Bee.BeeTypes.EGG:
+                    this.bees.push(new Bee.Egg(bee));
+                    break;
+                case Bee.BeeTypes.LARVA:
+                    this.bees.push(new Bee.Larva(bee));
                     break;
             }
         }

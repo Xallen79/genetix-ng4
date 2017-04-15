@@ -4,6 +4,8 @@ import { Point } from 'app/classes/hexmap/point.class';
 import * as Bee from 'app/classes/bee.class';
 import { IMapResourceState, MapResource } from 'app/classes/map-resource.class';
 import { ConfigService } from 'app/config/config.service';
+import { AppInjector } from "app/app.module";
+
 export interface IMapState {
     hiveStates?: IHiveState[];
     mapResourceStates?: IMapResourceState[];
@@ -49,14 +51,16 @@ export class Map implements IMap {
     stepTimeMs: number;
     private Q_PI: number = Math.PI / 4;
     private TWO_PI: number = Math.PI * 2;
-    constructor(private _configService: ConfigService, stepTimeMs: number, state?: IMapState) {
+    private _configService: ConfigService;
+    constructor(stepTimeMs: number, state?: IMapState) {
+        this._configService = AppInjector.get(ConfigService);
         this.hives = [];
         this.mapResources = [];
         this.stepTimeMs = stepTimeMs;
         if (state) {
             this.grid = new Grid(state.gridConfig);
             for (let h of state.hiveStates) {
-                var hive = new Hive(h, _configService);
+                var hive = new Hive(h);
                 for (let b of hive.bees) {
                     for (let nodeid of b.nodeIds)
                         b.nodes.push(this.grid.GetHexById(nodeid))
@@ -165,7 +169,7 @@ export class Map implements IMap {
         if (beeid) {
             var hive = this.getCurrentHive();
             var bee = hive.getBeeById(beeid);
-            var range = bee.getAbility('RNG').value;
+            var range = bee.getAbility('rng').value;
 
             var center = this.grid.GetHexById(hive.pos);
             for (let target of this.grid.Hexes) {
@@ -204,7 +208,7 @@ export class Map implements IMap {
             "maxSize": 5,
             "beeMutationChance": 0.0025,
             "pos": position
-        }, this._configService);
+        });
         this.hives.push(hive);
         return hive;
     }
