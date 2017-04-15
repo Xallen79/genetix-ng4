@@ -154,8 +154,9 @@ export abstract class BaseBee implements IBee {
             beeMutationChance: this.beeMutationChance,
             dead: this.dead,
             nodeIds: this.nodeIds,
-            traits: this.traits,
-            abilities: this.abilities,
+            /* not needed for save, uncomment for debugging */
+            // traits: this.traits,            
+            // abilities: this.abilities,
             genome: this.genome,
             isMoving: this.isMoving,
             harvesting: this.harvesting

@@ -8,7 +8,7 @@
                 <div *ngIf="building.getNextCost().length > 0">
                     <!--<div placement="bottom" [tooltip]="costTooltip" container="body" #tool="bs-tooltip" triggers="" (click)="tool.toggle()">-->
                     <div placement="bottom" [tooltip]="costTooltip" container="body">
-                        <button type="button" [disabled]="!building.canBuild" class="btn btn-xs btn-primary" ngClick="_gameServe.map.getCurrentHive().build(building)">
+                        <button type="button" [disabled]="!building.canBuild" class="btn btn-xs btn-primary" (click)="_gameServe.map.getCurrentHive().build(building)">
                             {{(building.name + ' (' + (building.gifted + building.purchased) + ')')}}
                         </button>
                     </div>

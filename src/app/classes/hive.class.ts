@@ -156,7 +156,11 @@ export class Hive implements IHive {
         else if (state.resources != null) {
             this.resources = [];
             for (let r of state.resources) {
+                // var res = new Resource(r);
+                // res.max = 1000;
+                // res.owned = 10;
                 this.resources.push(new Resource(r));
+
             }
         }
         // else do nothing, nothing in the state and this hive already has resources

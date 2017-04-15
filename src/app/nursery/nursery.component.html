@@ -1,16 +1,76 @@
 <div class="player-box">
     <h3 class="box-title">
-        <i class="icon-bee"></i> Nursery
+        <div class="row">
+            <div class="col-xs-3">
+                <i class="icon-bee"></i> Nursery
+            </div>
+            <div class="col-xs-3">
+                [0 / 10]
+            </div>
+            <div class="col-xs-6 pull-right" [attr.data-rid]="'royal_jelly'">
+                <div class="progress progress-custom">
+                    <progressbar [max]="getQueenBreedTimeSec()" [value]="getQueenElapsedSec()">
+                        <span class="workers">Egg Timer</span>
+                        <span class="amounts">{{getQueenElapsedSec()}} / {{getQueenBreedTimeSec()}}</span>
+                    </progressbar>
+                </div>
+            </div>
+        </div>
         <!--[{{$ctrl.hive.getNurseryCount()}} / {{$ctrl.hive.getNurseryLimit()}}]-->
     </h3>
     <div class="player-content">
         <div class="row breeder-container">
+            <div *ngFor="let egg of _gameService.map.getCurrentHive().getBeesByType('egg')">
+                <div class="bloqhead-component">
+                    <h5>
+                        <div class="col-xs-12 mortal-name">
+                            <span>{{egg.name}}</span>&nbsp;<i class="fa {{trait.icon}} {{trait.style}}" *ngFor="let trait of egg.traits"></i>
+                        </div>
+                    </h5>
+                    <div class="row">
+                        <div class="scalable-list-button">
+                            <button class="btn btn-xs btn-primary" (click)="assignMe(egg,'larva')" [disabled]="!canFertilize(egg)">Fertilize</button>
+                        </div>
+                        <div class="scalable-list-button">
+                            <button class="btn btn-xs btn-primary" (click)="assignMe(egg, 'drone')" [disabled]="!canBreed()">Make Drone</button>
+                        </div>
+                        <div class="scalable-list-button">
+                            <button class="btn btn-xs btn-primary" (click)="assignMe(egg,'consume')">Consume</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngFor="let larva of _gameService.map.getCurrentHive().getBeesByType('larva')">
+                <div class="bloqhead-component">
+                    <h5>
+                        <div class="col-xs-12 mortal-name">
+                            <span>{{egg.name}}</span>&nbsp;<i class="fa {{trait.icon}} {{trait.style}}" *ngFor="let trait of egg.traits"></i>
+                        </div>
+                    </h5>
+                    <div class="row">
+                        <div class="scalable-list-button">
+                            <button class="btn btn-xs btn-primary" (click)="assignMe(larva,'queen')" [disabled]="!canBreed()">Make Queen</button>
+                        </div>
+                        <div class="scalable-list-button">
+                            <button class="btn btn-xs btn-primary" (click)="assignMe(larva,'worker')" [disabled]="!canBreed()">Make Worker</button>
+                        </div>
+                        <div class="scalable-list-button">
+                            <button class="btn btn-xs btn-primary" (click)="assignMe(larva,'consume')">Consume</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
             <!--<div ng-repeat="child in $ctrl.hive.getBeesByType('egg')" class="col-xs-12 col-lg-12 animate-repeat">
                 <bloqhead-bee mode="NURSE" unit="child" assign="$ctrl.decideFate($id, $type)" can-breed="$ctrl.hive.getPopulationCount()<$ctrl.hive.getPopulationLimit()"></bloqhead-bee>
             </div>
             <div ng-repeat="child in $ctrl.hive.getBeesByType('larva')" class="col-xs-12 col-lg-12 animate-repeat">
                 <bloqhead-bee mode="NURSE" unit="child" assign="$ctrl.decideFate($id, $type)" can-breed="$ctrl.hive.getPopulationCount()<$ctrl.hive.getPopulationLimit()"></bloqhead-bee>
             </div>-->
+
+
         </div>
     </div>
 </div>
