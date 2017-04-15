@@ -51,7 +51,7 @@ $top-row-height: 25vh;
 }
 
 i.text-success {
-    color: $attr-defense;
+    color: $brand-success;
     @include strokeme($brand-success-dark)
 }
 
