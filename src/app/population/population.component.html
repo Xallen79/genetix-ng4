@@ -9,9 +9,22 @@
     </h3>
     <div class="player-content">
         <div class="row population-container">
-            <ul>
-                <li *ngFor="let bee of _gameService.map.getCurrentHive().bees">{{bee.name}}</li>
-            </ul>
+            <tabset type="pills">
+
+                <tab heading="Overview" customClass="tab-list-button">
+                    <h4>Queens</h4>
+                    <population-panel [filter]="{type:BeeTypes.QUEEN, traits:[]}"></population-panel>
+                    <h4>Workers</h4>
+                    <population-panel [filter]="{type:BeeTypes.WORKER, traits:[]}"></population-panel>
+                    <h4>Drones</h4>
+                    <population-panel [filter]="{type:BeeTypes.DRONE, traits:[]}"></population-panel>
+                </tab>
+                <tab heading="Custom View" customClass="tab-list-button">
+                    <ul>
+                        <li *ngFor="let bee of _gameService.map.getCurrentHive().bees">{{bee.name}}</li>
+                    </ul>
+                </tab>
+            </tabset>
             <!--<div class="col-xs-12">
                 <uib-tabset type="pills">
 

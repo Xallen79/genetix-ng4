@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { ProgressbarModule } from 'ngx-bootstrap/progressbar';
+import { TabsModule } from 'ngx-bootstrap/tabs';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA, Injector } from '@angular/core';
 import { UIRouterModule, UIView } from "ui-router-ng2";
 import { FormsModule } from '@angular/forms';
@@ -20,6 +21,8 @@ import { BuildingListComponent } from './building-list/building-list.component';
 import { MapComponent } from './map/map.component';
 import { PopulationComponent } from './population/population.component';
 import { GoalListComponent } from './goal-list/goal-list.component';
+import { PopulationPanelComponent } from './population-panel/population-panel.component';
+
 
 
 
@@ -35,17 +38,19 @@ import { GoalListComponent } from './goal-list/goal-list.component';
     BuildingListComponent,
     MapComponent,
     PopulationComponent,
-    GoalListComponent
+    GoalListComponent,
+    PopulationPanelComponent
   ],
   imports: [
     BrowserModule,
     TooltipModule.forRoot(),
     ProgressbarModule.forRoot(),
+    TabsModule.forRoot(),
     FormsModule,
     HttpModule,
     UIRouterModule.forRoot({
       states: APP_STATES,
-      useHash: true,
+      useHash: false,
       otherwise: { state: 'main' },
       config: routerConfigFn,
     }),

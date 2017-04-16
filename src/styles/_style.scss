@@ -150,14 +150,14 @@ h5 {
     float: left;
     width: 10vw;
     margin: .1vh .1vw .1vh .1vw;
-    button {
+    a {
         font-size: .8vw;
         width: 100%;
         margin: 0;
         color: $gray-light;
         background-color: rgba(0, 0, 0, .3);
     }
-    button:hover {
+    a:hover {
         @include linear-gradient(180deg, lighten($brand-primary, 30%) 0%, lighten($brand-primary, 10%) 30%, lighten($brand-primary, 10%) 100%);
     }
 }

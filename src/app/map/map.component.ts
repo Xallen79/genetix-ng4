@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewChecked, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewChecked, OnDestroy, HostListener } from '@angular/core';
 import { GameService } from 'app/game.service';
 import { IGridConfig } from 'app/classes/hexmap/grid.class';
 import { Subscription } from "rxjs/Subscription";
@@ -9,6 +9,7 @@ import { Subscription } from "rxjs/Subscription";
   styleUrls: ['./map.component.scss']
 })
 export class MapComponent implements OnInit, OnDestroy {
+
   private _imageList: string[] = [
     'bee.svg',
     'bee-2.svg',
@@ -24,6 +25,7 @@ export class MapComponent implements OnInit, OnDestroy {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
   stopClick: boolean = false;
+  mouseDown: boolean;
   dontTranslate: boolean = false;
   needsResize: boolean = false;
   mapconfig: IGridConfig;
@@ -78,14 +80,8 @@ export class MapComponent implements OnInit, OnDestroy {
     this.canvas = <HTMLCanvasElement>document.getElementById('map');
     this.context = this.canvas.getContext('2d');
 
-    // add mouse events
-    this.canvas.parentElement.addEventListener('mousewheel', (event) => { this.mousewheel(event) }, false);
-    this.canvas.parentElement.addEventListener('mousedown', (event) => { this.mousedown(event); }, false);
-    document.addEventListener('mouseup', (event) => { this.mouseup(event); }, false);
-    this.canvas.addEventListener('click', (event) => { this.click(event); }, false);
-
     this.gameLoopSub = this._gameService.animationEvent$.subscribe(elapsedMs => {
-      //console.log(elapsedMs);
+
       if (elapsedMs > 0) {
         var instantFps = 1 / (elapsedMs / 1000);
         if (this.fps === 0) this.fps = instantFps;
@@ -97,7 +93,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.setHexSize(this.mapconfig.hexConfig.HEIGHT);
   }
 
-  // mouse events
+  @HostListener('mousewheel', ['$event'])
   mousewheel(event) {
     if (event.wheelDeltaY > 0)
       this.zoomIn();
@@ -106,28 +102,35 @@ export class MapComponent implements OnInit, OnDestroy {
     return false;
   }
 
+  @HostListener('mousedown', ['$event'])
   mousedown(event) {
-    document.addEventListener('mousemove', this.bound_mousemove, false);
+    this.mouseDown = true;
   }
+
+  @HostListener('mouseup', ['$event'])
   mouseup(event) {
-    document.removeEventListener('mousemove', this.bound_mousemove, false);
     setTimeout(() => {
       this.stopClick = false;
+      this.mouseDown = false;
     });
   }
 
+  @HostListener('click', ['$event'])
   click(event) {
     if (!this.stopClick)
       this._gameService.map.mapClicked(event.offsetX, event.offsetY);
 
     return false;
   };
+
+  @HostListener('mousemove', ['$event'])
   mousemove(event) {
-    this.moveCanvasBy(event.movementX, event.movementY);
-    if (event.movementX !== 0 || event.movementY !== 0)
-      this.stopClick = true;
+    if (this.mouseDown) {
+      this.moveCanvasBy(event.movementX, event.movementY);
+      if (event.movementX !== 0 || event.movementY !== 0)
+        this.stopClick = true;
+    }
   };
-  bound_mousemove = evt => this.mousemove(evt);// necessary for removeEventListener to work
 
   zoomIn() {
     if (this.mapconfig.hexConfig.HEIGHT < this.hexsize_max)

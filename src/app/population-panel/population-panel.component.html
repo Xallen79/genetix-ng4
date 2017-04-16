@@ -1,0 +1,10 @@
+<div class="population-panel">
+    <table>
+        <tr *ngFor="let bee of _gameService.map.getCurrentHive().getBeesByType(filter.type)" class="population-list animate-repeat">
+            <td lvl-draggable="true" [attr.data-rid]="bee.id">
+                <span>{{bee.name}}</span>&nbsp;<i class="fa {{trait.icon}} {{trait.style}}" *ngFor="let trait of bee.traits"></i>
+            </td>
+        </tr>
+    </table>
+
+</div>
