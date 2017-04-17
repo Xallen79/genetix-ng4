@@ -5,7 +5,7 @@
                 <i class="icon-bee"></i> Nursery
             </div>
             <div class="col-xs-3">
-                [0 / 10]
+                [{{_gameService.map.getCurrentHive().getNurseryCount()}} / {{_gameService.map.getCurrentHive().nurseryLimit}}]
             </div>
             <div class="col-xs-6 pull-right" [attr.data-rid]="'royal_jelly'">
                 <div class="progress progress-custom">
@@ -24,18 +24,20 @@
                 <div class="bloqhead-component">
                     <h5>
                         <div class="col-xs-12 mortal-name">
-                            <span>{{egg.name}}</span>&nbsp;<i class="fa {{trait.icon}} {{trait.style}}" *ngFor="let trait of egg.traits"></i>
+                            <span><s class="dead" *ngIf="!isAlive(egg)">{{egg.name}}</s></span>
+                            <span *ngIf="isAlive(egg)">{{egg.name}}</span> &nbsp;
+                            <i class="fa icon-tombstone text-danger" *ngIf="!isAlive(egg)"></i><i class="fa {{trait.icon}} {{trait.style}}" *ngFor="let trait of egg.traits"></i>
                         </div>
                     </h5>
                     <div class="row">
                         <div class="scalable-list-button">
-                            <button class="btn btn-xs btn-primary" (click)="assignMe(egg,'larva')" [disabled]="!canFertilize(egg)">Fertilize</button>
+                            <button class="btn btn-xs btn-primary" (click)="assignBee(egg,BeeTypes.LARVA)" [disabled]="!canFertilize(egg)">Fertilize</button>
                         </div>
                         <div class="scalable-list-button">
-                            <button class="btn btn-xs btn-primary" (click)="assignMe(egg, 'drone')" [disabled]="!canBreed()">Make Drone</button>
+                            <button class="btn btn-xs btn-primary" (click)="assignBee(egg, BeeTypes.DRONE)" [disabled]="!canBreed(egg)">Make Drone</button>
                         </div>
                         <div class="scalable-list-button">
-                            <button class="btn btn-xs btn-primary" (click)="assignMe(egg,'consume')">Consume</button>
+                            <button class="btn btn-xs btn-primary" (click)="egg.die()" [disabled]="!isAlive(egg)">Consume</button>
                         </div>
                     </div>
                 </div>
@@ -45,18 +47,18 @@
                 <div class="bloqhead-component">
                     <h5>
                         <div class="col-xs-12 mortal-name">
-                            <span>{{egg.name}}</span>&nbsp;<i class="fa {{trait.icon}} {{trait.style}}" *ngFor="let trait of egg.traits"></i>
+                            <span>{{larva.name}}</span>&nbsp;<i class="fa icon-tombstone" *ngIf="!isAlive(larva)"></i><i class="fa {{trait.icon}} {{trait.style}}" *ngFor="let trait of larva.traits"></i>
                         </div>
                     </h5>
                     <div class="row">
                         <div class="scalable-list-button">
-                            <button class="btn btn-xs btn-primary" (click)="assignMe(larva,'queen')" [disabled]="!canBreed()">Make Queen</button>
+                            <button class="btn btn-xs btn-primary" (click)="assignBee(larva,BeeTypes.QUEEN)" [disabled]="!canBreed(larva)">Make Queen</button>
                         </div>
                         <div class="scalable-list-button">
-                            <button class="btn btn-xs btn-primary" (click)="assignMe(larva,'worker')" [disabled]="!canBreed()">Make Worker</button>
+                            <button class="btn btn-xs btn-primary" (click)="assignBee(larva,BeeTypes.WORKER)" [disabled]="!canBreed(larva)">Make Worker</button>
                         </div>
                         <div class="scalable-list-button">
-                            <button class="btn btn-xs btn-primary" (click)="assignMe(larva,'consume')">Consume</button>
+                            <button class="btn btn-xs btn-primary" (click)="larva.die()" [disabled]="!isAlive(larva)">Consume</button>
                         </div>
                     </div>
                 </div>

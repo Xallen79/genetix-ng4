@@ -55,7 +55,8 @@ i.text-success {
     @include strokeme($brand-success-dark)
 }
 
-i.text-danger {
+i.text-danger,
+.dead {
     color: $brand-danger;
     @include strokeme($brand-danger-dark)
 }

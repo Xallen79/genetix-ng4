@@ -9,7 +9,7 @@ import * as Bee from 'app/classes/bee.class';
   styleUrls: ['./nursery.component.scss']
 })
 export class NurseryComponent implements OnInit {
-
+  BeeTypes = Bee.BeeTypes;
   constructor(public _gameService: GameService) { }
 
   ngOnInit() {
@@ -26,16 +26,20 @@ export class NurseryComponent implements OnInit {
 
   }
 
-  canBreed(): boolean {
-    return true;
+  canBreed(bee: Bee.BaseBee): boolean {
+    return this.isAlive(bee);
   }
 
   canFertilize(egg: Bee.Egg): boolean {
-    return true;
+    return this.isAlive(egg);
   }
 
-  assignMe(bee: Bee.BaseBee, action: string) {
-    console.log(bee.name + '->' + action);
+  isAlive(bee: Bee.BaseBee): boolean {
+    return !bee.dead;
+  }
+
+  assignBee(bee: Bee.BaseBee, type: Bee.BeeTypes) {
+    this._gameService.map.getCurrentHive().assignBee(bee, type);
   }
 
 }

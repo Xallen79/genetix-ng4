@@ -74,7 +74,7 @@ export class Genome implements IGenome {
     fertilize(mate: IGenome): IGenome {
         var offspring: Genome;
         var chromosomes: [IChromosomeState[]] = [[]];
-        if (!this.hasPairs || !mate.hasPairs)
+        if (this.hasPairs || mate.hasPairs)
             throw new Error("Cannot mate genomes with chromosome pairs.");
 
         chromosomes[0] = Object.assign({}, this.chromosomes[0]);

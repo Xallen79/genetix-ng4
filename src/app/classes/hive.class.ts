@@ -4,6 +4,9 @@ import { Resource } from '../config/resourceTypes.config';
 import { Map } from 'app/classes/map.class';
 import { ConfigService } from 'app/config/config.service';
 import { AppInjector } from "app/app.module";
+import { LogService } from 'app/log/log.component';
+import { sprintf } from 'sprintf-js';
+import { JobID } from "app/config/jobTypes.config";
 
 export interface IHiveState {
     id: number;
@@ -24,12 +27,14 @@ interface IHive extends IHiveState {
     update(state: IHiveState): void;
     getBeesByType(type: Bee.BeeTypes): Bee.BaseBee[];
     getBeeById(id: string): Bee.BaseBee;
-    getNurseyCount(): number;
+    getNurseryCount(): number;
+    getNurseryCount(): number;
     loadBees(state: IHiveState): void;
     createInitialQueen(inseminate: boolean): void;
     updateResources(state: IHiveState): void;
     updateBuildings(state: IHiveState): void;
     getNextId(): string;
+    assignBee(bee: Bee.BaseBee, type: Bee.BeeTypes): void;
     handleGameLoop(elapsedMs: number, map: Map): void;
 
 
@@ -49,10 +54,15 @@ export class Hive implements IHive {
     bees: Bee.BaseBee[];
     resources: Resource[];
     buildings: Building[];
+    nurseryLimit: number;
+    populationLimit: number;
     private _configService: ConfigService;
+    private _logService: LogService;
     constructor(state: IHiveState) {
         this._configService = AppInjector.get(ConfigService);
+        this._logService = AppInjector.get(LogService);
         this.update(state);
+
 
     }
 
@@ -102,9 +112,13 @@ export class Hive implements IHive {
         return this.bees[index];
     }
 
-    getNurseyCount(): number {
+    getNurseryCount(): number {
         return this.getBeesByType(Bee.BeeTypes.EGG).length + this.getBeesByType(Bee.BeeTypes.LARVA).length;
     }
+    getPopulationCount = function () {
+        return this.bees.length - this.getNurseryCount();
+    };
+
 
     loadBees(state: IHiveState): void {
         this.bees = [];
@@ -133,7 +147,7 @@ export class Hive implements IHive {
             id: this.getNextId(),
             generation: 0,
             beeMutationChance: this.beeMutationChance,
-            jid: 'breeder',
+            jid: JobID.BREEDER,
             pos: this.pos
         });
         if (inseminate) {
@@ -178,14 +192,56 @@ export class Hive implements IHive {
             }
         }
         // else do nothing, nothing in the state and this hive already has buildings
-
-
+        this.nurseryLimit = 0;
+        this.populationLimit = 0;
+        for (let building of this.buildings) {
+            switch (building.use) {
+                case 'storage':
+                    break;
+                case 'nursery':
+                    this.nurseryLimit += building.getSize();
+                    break;
+                case 'housing':
+                    this.populationLimit += building.getSize();
+                    break;
+            }
+        }
     }
 
     getNextId(): string {
         return ++this.nextId + '-H' + this.id;
     }
 
+    assignBee(bee: Bee.BaseBee, type: Bee.BeeTypes): void {
+        let msg = "";
+        let index = this.bees.findIndex(b => b.id === bee.id);
+        switch (type) {
+            case Bee.BeeTypes.DRONE:
+                var drone = bee.hatch(type);
+                this.bees[index] = drone;
+                msg = sprintf("New %(type)S in Hive#%(id)d! (%(name)s)", { type: type, name: drone.name, id: this.id });
+                break;
+            case Bee.BeeTypes.LARVA:
+                var queen = this.bees.find(b => b.jid === JobID.BREEDER);
+                if (!queen)
+                    msg = "Cannot fertlize egg. There is no queen assigned to breeding duties.";
+                else {
+                    var larva = queen.fertilizeEgg(bee);
+                    this.bees[index] = larva;
+                    msg = sprintf("New %(type)s in Hive#%(id)d! (%(name)s)", { type: type, name: larva.name, id: this.id });
+                }
+                break;
+            case Bee.BeeTypes.QUEEN:
+            case Bee.BeeTypes.WORKER:
+                var worker = bee.mature(type);
+                this.bees[index] = worker;
+                msg = sprintf("New %(type)s in Hive#%(id)d! (%(name)s)", { type: type, name: worker.name, id: this.id });
+                break;
+            default:
+                msg = sprintf("Invalid type: %s", type);
+        }
+        this._logService.logGeneralMessage(msg);
+    }
 
     handleGameLoop(ms: number, map: Map): void {
 

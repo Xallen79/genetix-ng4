@@ -2,8 +2,7 @@
     <h3 class="box-title">
         <div class="row">
             <div class="col-xs-5">
-                <i class="fa fa-globe"></i> Hive#{{_gameService.map.currentHiveID}}
-                <!--{{$ctrl.hive.id}} Population [{{$ctrl.hive.getPopulationCount()}} / {{$ctrl.hive.getPopulationLimit()}}]-->
+                <i class="fa fa-globe"></i> Hive#{{_gameService.map.currentHiveID}} Population [{{_gameService.map.getCurrentHive().getPopulationCount()}} / {{_gameService.map.getCurrentHive().populationLimit}}]
             </div>
         </div>
     </h3>

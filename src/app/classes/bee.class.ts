@@ -5,8 +5,9 @@ import { Hexagon } from "app/classes/hexmap/hexagon.class";
 import { JobType, JobID, JOB_TYPES, JobAction, IJobStep } from "app/config/jobTypes.config";
 import { Hive } from "app/classes/hive.class";
 import { Map } from "app/classes/map.class";
-import { AppInjector } from "app/app.module";
+import { AppInjector, randomIntFromInterval } from "app/app.module";
 import { Ability, AbilityID } from "app/config/abilities.config";
+import { LogService } from "app/log/log.component";
 
 export interface IBeeState {
     id: string;
@@ -32,6 +33,8 @@ export interface IBeeState {
     abilities?: Ability[];
     name?: string;
     genome?: Genome;
+    droneGenomes?: Genome[];
+    droneIds?: string[];
     isMoving?: boolean;
     harvesting?: boolean;
 }
@@ -42,6 +45,7 @@ interface IBee extends IBeeState {
     die(): void;
     getAbility(abilityId: AbilityID): Ability;
     mature(type: BeeTypes): BaseBee;
+    fertilizeEgg(bee: BaseBee): BaseBee;
     hatch(type: BeeTypes): BaseBee;
     mate(bee: BaseBee): void;
     storageAmount(rid: string): number;
@@ -99,11 +103,11 @@ export abstract class BaseBee implements IBee {
     harvesting?: boolean;
 
     private _configService: ConfigService;
-
-
+    private _logService: LogService;
 
     constructor(config?: IBeeState) {
         this._configService = AppInjector.get(ConfigService);
+        this._logService = AppInjector.get(LogService);
     }
     update(config?: IBeeState): void {
         this.id = config && config.id || this.id || '0';
@@ -171,6 +175,9 @@ export abstract class BaseBee implements IBee {
         return this.abilities.find(a => a.abilityId === abilityId);
     }
     mature(type: BeeTypes): BaseBee {
+        throw new Error('Method not implemented.');
+    }
+    fertilizeEgg(bee: BaseBee): BaseBee {
         throw new Error('Method not implemented.');
     }
     hatch(type: BeeTypes): BaseBee {
@@ -266,24 +273,62 @@ export abstract class BaseBee implements IBee {
 
 export class Queen extends BaseBee {
     minDrones: number;
+    droneGenomes: Genome[];
+    droneIds: string[];
     constructor(config: IBeeState) {
         super(config);
         this.beetype = BeeTypes.QUEEN;
         this.hasPairs = true;
         this.minDrones = 10;
+        this.droneGenomes = [];
+        this.droneIds = [];
         this.update(config);
 
     }
     update(config?: IBeeState): void {
+        if (config && config.droneGenomes) {
+            for (let g of config.droneGenomes)
+                this.droneGenomes.push(new Genome(g, false));
+            this.droneIds = config.droneIds;
+        }
         super.update(config);
 
+
+    }
+    getState(): IBeeState {
+        var state = super.getState();
+        state.droneGenomes = this.droneGenomes;
+        state.droneIds = this.droneIds;
+        return state;
+    }
+    fertilizeEgg(bee: BaseBee): BaseBee {
+        if (bee.beetype !== BeeTypes.EGG) throw new Error("Can only fertilize eggs.");
+
+        var d = randomIntFromInterval(0, this.droneGenomes.length - 1);
+        var droneGenome = this.droneGenomes[d];
+        var newGenome = bee.genome.fertilize(droneGenome) as Genome;
+
+        var child = new Larva({
+            id: bee.id,
+            dt: new Date().getTime(),
+            generation: this.generation + 1,
+            genome: newGenome,
+            queenParentId: this.id,
+            droneParentId: this.droneIds[d],
+            beeMutationChance: this.beeMutationChance,
+            pos: this.pos
+
+        });
+        return child;
     }
     canLayEggs(hive: Hive): boolean {
         // temporary
-        return hive.bees.length < 10;
+        return hive.getNurseryCount() < hive.nurseryLimit && this.droneGenomes.length >= this.minDrones;
     }
     mate(drone: BaseBee): void {
         if (drone.beetype !== BeeTypes.DRONE) throw new Error("Queen cannot mate with non-drone bees");
+        this.droneGenomes.push(drone.genome);
+        this.droneIds.push(drone.id);
         drone.die();
     }
     doSpawn(ms: number, hive: Hive) {
