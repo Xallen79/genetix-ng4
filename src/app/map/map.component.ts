@@ -24,7 +24,6 @@ export class MapComponent implements OnInit, OnDestroy {
   images: HTMLImageElement[];
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
-  mouseDown: boolean;
   mouseMoved: boolean;
   dontTranslate: boolean = false;
   needsResize: boolean = false;
