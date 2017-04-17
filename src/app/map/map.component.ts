@@ -24,8 +24,8 @@ export class MapComponent implements OnInit, OnDestroy {
   images: HTMLImageElement[];
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
-  stopClick: boolean = false;
   mouseDown: boolean;
+  mouseMoved: boolean;
   dontTranslate: boolean = false;
   needsResize: boolean = false;
   mapconfig: IGridConfig;
@@ -104,33 +104,31 @@ export class MapComponent implements OnInit, OnDestroy {
 
   @HostListener('mousedown', ['$event'])
   mousedown(event) {
-    this.mouseDown = true;
+
+    if (event.button === 0)
+      this.mouseMoved = false;
+
+    return false;
   }
 
   @HostListener('mouseup', ['$event'])
   mouseup(event) {
-    setTimeout(() => {
-      this.stopClick = false;
-      this.mouseDown = false;
-    });
+    if (event.button === 0 && !this.mouseMoved && event.target.id === 'map')
+      this._gameService.map.mapClicked(event.offsetX, event.offsetY);
+    return false;
   }
 
-  @HostListener('click', ['$event'])
-  click(event) {
-    if (!this.stopClick)
-      this._gameService.map.mapClicked(event.offsetX, event.offsetY);
 
-    return false;
-  };
 
   @HostListener('mousemove', ['$event'])
   mousemove(event) {
-    if (this.mouseDown) {
+    if (event.buttons === 1 && (Math.abs(event.movementX) > 0.1 || Math.abs(event.movementY) > 0.1)) {
+      this.mouseMoved = true;
       this.moveCanvasBy(event.movementX, event.movementY);
-      if (event.movementX !== 0 || event.movementY !== 0)
-        this.stopClick = true;
     }
-  };
+    return false;
+
+  }
 
   zoomIn() {
     if (this.mapconfig.hexConfig.HEIGHT < this.hexsize_max)
