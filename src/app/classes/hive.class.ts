@@ -219,7 +219,7 @@ export class Hive implements IHive {
             case Bee.BeeTypes.DRONE:
                 var drone = bee.hatch(type);
                 this.bees[index] = drone;
-                msg = sprintf("New %(type)S in Hive#%(id)d! (%(name)s)", { type: type, name: drone.name, id: this.id });
+                msg = sprintf("New %(type)s in Hive#%(id)d! (%(name)s)", { type: type, name: drone.name, id: this.id });
                 break;
             case Bee.BeeTypes.LARVA:
                 var queen = this.bees.find(b => b.jid === JobID.BREEDER);
