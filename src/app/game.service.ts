@@ -46,6 +46,9 @@ export class GameService {
         }
         this._msSinceAutoSave = 0;
         this._elapsedMs.next(0);
+        var offlineMs = now - this.saveTime;
+        if (offlineMs >= this.stepTimeMs)
+            this.map.handleGameLoop(offlineMs);
         this._animationRequest = window.requestAnimationFrame(this.gameLoop.bind(this));
 
     }

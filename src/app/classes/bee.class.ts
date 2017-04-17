@@ -424,6 +424,7 @@ export class Larva extends BaseBee {
         if (type === BeeTypes.WORKER) {
             return new Worker({
                 id: this.id,
+                genome: this.genome,
                 generation: this.generation,
                 beeMutationChance: this.beeMutationChance,
                 pos: this.pos
