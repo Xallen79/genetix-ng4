@@ -2,7 +2,7 @@
     <h3 class="box-title">
         <div class="row">
             <div class="col-xs-12">
-                <i class="fa fa-globe"></i> Hive#{{_gameService.map.currentHiveID}} Population [{{_gameService.map.getCurrentHive().getPopulationCount()}} / {{_gameService.map.getCurrentHive().populationLimit}}]
+                <i class="fa fa-globe"></i> Hive#{{_gameService.map.currentHiveID}} Population [{{_gameService.map.currentHive.getPopulationCount()}} / {{_gameService.map.currentHive.populationLimit}}]
             </div>
         </div>
     </h3>
@@ -20,7 +20,7 @@
                 </tab>
                 <tab heading="Custom View" customClass="tab-list-button">
                     <ul>
-                        <li *ngFor="let bee of _gameService.map.getCurrentHive().bees">{{bee.name}}</li>
+                        <li *ngFor="let bee of _gameService.map.currentHive.bees">{{bee.name}}</li>
                     </ul>
                 </tab>
             </tabset>

@@ -5,7 +5,7 @@ import * as Bee from './classes/bee.class';
 import { IMapState, Map } from 'app/classes/map.class';
 import { ConfigService } from 'app/config/config.service';
 import { LogService } from 'app/log/log.component';
-import { ResourceID } from "app/config/resourceTypes.config";
+import { ResourceID } from "app/config/types.config";
 import * as LZString from 'lz-string'
 
 
@@ -38,7 +38,7 @@ export class GameService {
         this.saveTime = savedState && savedState.saveTime || now;
         this.lastTime = null;
         this.map = null;
-        this.stepTimeMs = savedState && savedState.stepTimeMs || 500;
+        this.stepTimeMs = 50 || savedState && savedState.stepTimeMs || 50;
         if (savedState && savedState.map) {
             this.map = new Map(this.stepTimeMs, savedState.map);
         } else {

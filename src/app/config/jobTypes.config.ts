@@ -1,14 +1,7 @@
 
-import { AbilityID } from 'app/config/abilities.config';
+import { AbilityID, JobID } from 'app/config/types.config';
 
-export type JobID = 'idle' | 'breeder' | 'forager' |
-    'nurse' | 'producer_food' | 'producer_honey' |
-    'builder' | 'undertaker' | 'guard';
-export const JobID = {
-    IDLE: 'idle' as JobID, BREEDER: 'breeder' as JobID, FORAGER: 'forager' as JobID,
-    NURSE: 'nurse' as JobID, PRODUCER_FOOD: 'producer_food' as JobID, PRODUCER_HONEY: 'producer_honey' as JobID,
-    BUILDER: 'builder' as JobID, UNDERTAKER: 'undertaker' as JobID, GUARD: 'guard' as JobID
-}
+
 export type JobAction = "spawn" | "travel" | "collect" | "deposit" | "produce" | "protect";
 export const JobAction = {
     SPAWN: 'spawn' as JobAction,
@@ -55,7 +48,7 @@ export class JobType implements IJobType {
 
 export var JOB_TYPES: IJobType[] = [{
     jid: JobID.IDLE,
-    name: "Idler",
+    name: "Idle",
     desc: "No job assigned.",
     actions: [],
     beetypes: ['drone', 'egg', 'larva', 'queen', 'worker']
@@ -105,7 +98,7 @@ export var JOB_TYPES: IJobType[] = [{
 },
 {
     jid: JobID.PRODUCER_FOOD,
-    name: "Food Producre",
+    name: "Food Producer",
     desc: "Converts stored honey, pollen, and water into usable food",
     actions: [{
         action: JobAction.PRODUCE,

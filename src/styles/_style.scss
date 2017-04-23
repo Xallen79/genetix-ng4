@@ -450,6 +450,20 @@ table.genomeEditor {
             position: absolute;
             left: .25vw;
         }
+        >span.work-status {
+            overflow-x: visible;
+            white-space: nowrap;
+            position: absolute;
+            font-size: 0.65vw;
+            left: .2vw;
+        }
+        >span.work-amounts {
+            overflow-x: visible;
+            white-space: nowrap;
+            position: absolute;
+            font-size: 0.65vw;
+            right: .2vw;
+        }
     }
 }
 

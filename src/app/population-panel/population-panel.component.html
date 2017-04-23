@@ -1,10 +1,17 @@
 <div class="population-panel">
-    <table>
-        <tr *ngFor="let bee of _gameService.map.getCurrentHive().getBeesByType(filter.type)" class="population-list animate-repeat">
-            <td lvl-draggable="true" [attr.data-rid]="bee.id">
+    <div class="row">
+        <div class="row" *ngFor="let bee of _gameService.map.currentHive.getBeesByType(this.filter.type)" class="population-list animate-repeat">
+            <div class="col-xs-12 col-sm-4" bloqheadDraggable [data]="bee.id" [dropTargetIds]="jids[bee.beetype]" [attr.data-rid]="bee.id">
                 <span>{{bee.name}}</span>&nbsp;<i class="fa {{trait.icon}} {{trait.style}}" *ngFor="let trait of bee.traits"></i>
-            </td>
-        </tr>
-    </table>
-
+            </div>
+            <div class="col-xs-12 col-sm-8" *ngIf="bee.workStatus" [attr.data-rid]="bee.workStatus.rid || 'NONE'">
+                <div class="progress progress-custom">
+                    <progressbar [max]="bee.workStatus.max" [value]="bee.workStatus.value" [animate]="false">
+                        <span class="work-status">{{bee.workStatus.action}}</span>
+                        <span class="work-amounts">{{bee.workStatus.value|number:'1.1-1'}} / {{bee.workStatus.max|number:'1.1-1'}}</span>
+                    </progressbar>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

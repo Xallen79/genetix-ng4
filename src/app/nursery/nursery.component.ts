@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { GameService } from 'app/game.service';
-import { AbilityID } from 'app/config/abilities.config';
+import { AbilityID } from 'app/config/types.config';
 import * as Bee from 'app/classes/bee.class';
 
 @Component({
@@ -10,6 +10,8 @@ import * as Bee from 'app/classes/bee.class';
 })
 export class NurseryComponent implements OnInit {
   BeeTypes = Bee.BeeTypes;
+  larvas: Bee.BaseBee[];
+  eggs: Bee.BaseBee[];
   constructor(public _gameService: GameService) { }
 
   ngOnInit() {
@@ -17,12 +19,12 @@ export class NurseryComponent implements OnInit {
   }
 
   getQueenElapsedSec(): number {
-    return Math.round(this._gameService.map.getCurrentHive().bees.find(b => b.jid === 'breeder').msSinceWork / 1000);
+    return Math.round(this._gameService.map.currentHive.bees.find(b => b.jid === 'breeder').msSinceWork / 1000);
 
   }
 
   getQueenBreedTimeSec(): number {
-    return Math.round(this._gameService.map.getCurrentHive().bees.find(b => b.jid === 'breeder').getAbility(AbilityID.PRD_EGG).value / 1000);
+    return Math.round(this._gameService.map.currentHive.bees.find(b => b.jid === 'breeder').getAbility(AbilityID.PRD_EGG).value / 1000);
 
   }
 
@@ -39,7 +41,7 @@ export class NurseryComponent implements OnInit {
   }
 
   assignBee(bee: Bee.BaseBee, type: Bee.BeeTypes) {
-    this._gameService.map.getCurrentHive().assignBee(bee, type);
+    this._gameService.map.currentHive.assignBee(bee, type);
   }
 
 }

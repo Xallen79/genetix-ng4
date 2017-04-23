@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewChecked, OnDestroy, HostListener } from '@a
 import { GameService } from 'app/game.service';
 import { IGridConfig } from 'app/classes/hexmap/grid.class';
 import { Subscription } from "rxjs/Subscription";
+import { Point } from "app/classes/hexmap/point.class";
 
 @Component({
   selector: 'bloqhead-map',
@@ -86,14 +87,14 @@ export class MapComponent implements OnInit, OnDestroy {
         if (this.fps === 0) this.fps = instantFps;
         this.fps = (this.fps * this.smoothing) + (instantFps * (1.0 - this.smoothing));
       }
-      this.draw();
+      this.draw(elapsedMs);
     });
 
     this.setHexSize(this.mapconfig.hexConfig.HEIGHT);
   }
 
   @HostListener('mousewheel', ['$event'])
-  mousewheel(event) {
+  mousewheel(event: MouseWheelEvent) {
     if (event.wheelDeltaY > 0)
       this.zoomIn();
     if (event.wheelDeltaY < 0)
@@ -102,7 +103,7 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('mousedown', ['$event'])
-  mousedown(event) {
+  mousedown(event: MouseEvent) {
 
     if (event.button === 0)
       this.mouseMoved = false;
@@ -111,8 +112,8 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('mouseup', ['$event'])
-  mouseup(event) {
-    if (event.button === 0 && !this.mouseMoved && event.target.id === 'map')
+  mouseup(event: MouseEvent) {
+    if (event.button === 0 && !this.mouseMoved && (<Element>event.target).id === 'map')
       this._gameService.map.mapClicked(event.offsetX, event.offsetY);
     return false;
   }
@@ -120,7 +121,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
 
   @HostListener('mousemove', ['$event'])
-  mousemove(event) {
+  mousemove(event: MouseEvent) {
     if (event.buttons === 1 && (Math.abs(event.movementX) > 0.1 || Math.abs(event.movementY) > 0.1)) {
       this.mouseMoved = true;
       this.moveCanvasBy(event.movementX, event.movementY);
@@ -163,7 +164,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.needsResize = true;
   };
 
-  draw() {
+  draw(elapsedMs: number) {
     if (typeof this.canvas === 'undefined' || typeof this.context === 'undefined')
       return;
 
@@ -172,7 +173,7 @@ export class MapComponent implements OnInit, OnDestroy {
       this.resizeCanvas();
     }
 
-    this._gameService.map.drawMap(this.context);
+    this._gameService.map.drawMap(this.context, elapsedMs);
   }
 
   resizeCanvas() {
@@ -197,5 +198,22 @@ export class MapComponent implements OnInit, OnDestroy {
         this.moveCanvasBy(tran_x, tran_y);
     }
     this.dontTranslate = false;
+  }
+
+  dragEnter(event) {
+    this._gameService.map.setRangeGraph(event.dragData);
+  }
+
+  dragLeave(event) {
+    this._gameService.map.setRangeGraph(null);
+  }
+
+  dropped(event) {
+
+    var hex = this._gameService.map.grid.GetHexAt(new Point(event.nativeEvent.offsetX, event.nativeEvent.offsetY));
+    if (hex && hex.inRange && hex.mapResource)
+      this._gameService.map.getBeeById(event.dragData).addWaypointNode(hex);
+
+    this._gameService.map.setRangeGraph(null);
   }
 }

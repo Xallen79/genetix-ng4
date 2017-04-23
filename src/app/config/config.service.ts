@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ITrait, Trait, DEFAULT_TRAITS } from './traits.config';
 import { Building, DEFAULT_BUILDINGS } from './buildingTypes.config';
-import { Resource, DEFAULT_RESOURCES, ResourceID } from './resourceTypes.config';
+import { Resource, DEFAULT_RESOURCES } from './resourceTypes.config';
 import { Genome } from 'app/classes/genome.class';
 import { Ability, DEFAULT_ABILITIES } from "app/config/abilities.config";
+import { ResourceID } from './types.config';
 
 @Injectable()
 export class ConfigService {

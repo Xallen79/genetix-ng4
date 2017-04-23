@@ -1,4 +1,5 @@
 import * as Bee from './bee.class';
+import { ResourceID } from "app/config/types.config";
 export interface IMapResourceState {
     id: number;
     level?: number;
@@ -70,6 +71,7 @@ export class MapResource implements IMapResource {
         this.water = state && state.water || 0;
         this.col_water = state && state.col_water || 0;
         this.harvestMultiplier = state && state.harvestMultiplier || 1.0;
+        this.beeIsHarvesting = state && state.beeIsHarvesting || false;
         this.resourceName = state && state.resourceName || '??';
         this.beeids = state && state.beeids || [];
         this.bees = [];
@@ -77,6 +79,7 @@ export class MapResource implements IMapResource {
         this.name = this.resourceName + " #" + this.id;
     }
     getState(): IMapResourceState {
+        let beeids: string[] = this.bees.map(a => a.id);
         return {
             id: this.id,
             level: this.level,
@@ -95,7 +98,7 @@ export class MapResource implements IMapResource {
             harvestMultiplier: this.harvestMultiplier,
             beeIsHarvesting: this.beeIsHarvesting,
             resourceName: this.resourceName,
-            beeids: this.beeids
+            beeids: beeids
         };
     }
     queueHarvest(bee: Bee.BaseBee): void {
@@ -123,26 +126,26 @@ export class MapResource implements IMapResource {
         this.col_pollen = 0;
         this.col_water = 0;
     }
-    getAvailable(rid: string): number {
+    getAvailable(rid: ResourceID): number {
         var avail = 0;
         switch (rid) {
-            case "NECTAR":
+            case ResourceID.NECTAR:
                 avail = this.nectar - this.col_nectar;
                 break;
-            case "POLLEN":
+            case ResourceID.POLLEN:
                 avail = this.pollen - this.col_pollen;
                 break;
-            case "WATER":
+            case ResourceID.WATER:
                 avail = this.water - this.col_water;
                 break;
         }
         return avail;
     }
-    collect(rid: string, amount: number): number {
+    collect(rid: ResourceID, amount: number): number {
         var harvestAmount = 0;
         var avail = 0;
         switch (rid) {
-            case "NECTAR":
+            case ResourceID.NECTAR:
                 avail = this.getAvailable(rid);
                 if (amount <= avail)
                     harvestAmount = amount;
@@ -151,7 +154,7 @@ export class MapResource implements IMapResource {
                 this.col_nectar += harvestAmount;
 
                 break;
-            case "POLLEN":
+            case ResourceID.POLLEN:
                 avail = this.getAvailable(rid);
                 if (amount <= avail)
                     harvestAmount = amount;
@@ -159,7 +162,7 @@ export class MapResource implements IMapResource {
                     harvestAmount = avail;
                 this.col_pollen += harvestAmount;
                 break;
-            case "WATER":
+            case ResourceID.WATER:
                 avail = this.getAvailable(rid);
                 if (amount <= avail)
                     harvestAmount = amount;

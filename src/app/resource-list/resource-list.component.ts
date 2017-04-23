@@ -12,4 +12,13 @@ export class ResourceListComponent implements OnInit {
     ngOnInit() {
 
     }
+
+    dropped(e, jid) {
+        var bee = this._gameService.map.currentHive.getBeeById(e.dragData);
+        bee.setJob(jid);
+    }
+
+    getWorkerCount(jid) {
+        return this._gameService.map.currentHive.bees.filter(b => b.jid === jid).length;
+    }
 }

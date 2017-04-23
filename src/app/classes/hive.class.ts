@@ -1,12 +1,13 @@
 import * as Bee from './bee.class';
 import { Building } from '../config/buildingTypes.config';
 import { Resource } from '../config/resourceTypes.config';
+import { ResourceID } from 'app/config/types.config';
 import { Map } from 'app/classes/map.class';
 import { ConfigService } from 'app/config/config.service';
 import { AppInjector } from "app/app.module";
 import { LogService } from 'app/log/log.component';
 import { sprintf } from 'sprintf-js';
-import { JobID } from "app/config/jobTypes.config";
+import { JobID } from "app/config/types.config";
 
 export interface IHiveState {
     id: number;
@@ -32,6 +33,7 @@ interface IHive extends IHiveState {
     loadBees(state: IHiveState): void;
     createInitialQueen(inseminate: boolean): void;
     updateResources(state: IHiveState): void;
+    changeResource(rid: ResourceID, amount: number): number;
     updateBuildings(state: IHiveState): void;
     getNextId(): string;
     assignBee(bee: Bee.BaseBee, type: Bee.BeeTypes): void;
@@ -170,24 +172,49 @@ export class Hive implements IHive {
         else if (state.resources != null) {
             this.resources = [];
             for (let r of state.resources) {
-                // var res = new Resource(r);
+                var res = new Resource(r);
                 // res.max = 1000;
                 // res.owned = 10;
-                this.resources.push(new Resource(r));
+                this.resources.push(res);
 
             }
         }
         // else do nothing, nothing in the state and this hive already has resources
     }
+    changeResource(rid: ResourceID, amount: number): number {
+        var r = this.resources.find(r => r.rid === rid);
 
-    updateBuildings(state: IHiveState): void {
-        if (state.buildings == null && this.buildings == null)
+        r.owned += amount;
+        var actualAmount = amount;
+        if (r.max != -1 && r.owned > r.max) {
+            actualAmount = amount - (r.owned - r.max);
+            r.owned = r.max;
+        }
+        // if this puts us negative, we cannot deduct the amount, reset and return -1 to indicate failure.
+        if (r.owned < 0) {
+            r.owned -= amount;
+            return -1;
+        }
+        // we didn't actually add anything, return -2
+        if (actualAmount === 0) return -2;
+        this.updateBuildings();
+        return r.owned;
+
+    }
+    build(building: Building) {
+        var costs = building.build();
+        for (let cost of costs) {
+            this.changeResource(cost.resource.rid, cost.amount * -1);
+        }
+        this.updateBuildings();
+    }
+    updateBuildings(state?: IHiveState): void {
+        if (state && state.buildings == null && this.buildings == null)
             this.buildings = this._configService.getDefaultBuildings();
-        else if (state.buildings != null) {
+        else if (state && state.buildings != null) {
             this.buildings = [];
             for (let b of state.buildings) {
                 let building: Building = new Building(b);
-                building.setCanBuild(this.resources);
                 this.buildings.push(building);
             }
         }
@@ -195,8 +222,10 @@ export class Hive implements IHive {
         this.nurseryLimit = 0;
         this.populationLimit = 0;
         for (let building of this.buildings) {
+            building.setCanBuild(this.resources);
             switch (building.use) {
                 case 'storage':
+                    this.resources.find(r => r.rid === building.rid).max = building.getSize();
                     break;
                 case 'nursery':
                     this.nurseryLimit += building.getSize();

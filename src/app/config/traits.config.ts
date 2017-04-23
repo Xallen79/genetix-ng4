@@ -1,4 +1,4 @@
-import { AbilityID } from 'app/config/abilities.config';
+import { AbilityID } from 'app/config/types.config';
 export interface ITrait {
     id: string;
     name: string;

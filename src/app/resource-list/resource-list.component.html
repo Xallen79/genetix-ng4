@@ -4,20 +4,20 @@
     </h3>
     <div class="player-content">
         <div class="resource-list col-xs-12">
-            <div class="row" *ngFor="let resource of _gameService.map.getCurrentHive().resources" [attr.data-rid]="resource.rid">
+            <div class="row" *ngFor="let resource of _gameService.map.currentHive.resources" [attr.data-rid]="resource.rid" bloqheadDropTarget [enabled]="resource.jid !== 'forager'" [dropTargetId]="resource.jid" (onDrop)="dropped($event, resource.jid)">
                 <div class="col-xs-12 col-sm-3">
                     <h5 tooltip="{{resource.desc}}" container="body" placement="right">{{resource.name}}</h5>
                 </div>
                 <div class="col-xs-12 col-sm-9">
                     <div class="progress progress-custom" *ngIf="resource.max !== -1">
                         <progressbar [max]="resource.max" [value]="resource.owned">
-                            <span class="workers"><i class="fa" [ngClass]="resource.icon"></i> 0</span>
+                            <span class="workers"><i class="fa" [ngClass]="resource.icon"></i> {{getWorkerCount(resource.jid)}}</span>
                             <span class="amounts">{{resource.owned}} / {{resource.max}}</span>
                         </progressbar>
                     </div>
                     <div class="progress progress-custom" *ngIf="resource.max === -1">
                         <progressbar [max]="0" [value]="0">
-                            <span class="workers"><i class="fa" [ngClass]="resource.icon"></i> 0</span>
+                            <span class="workers"><i class="fa" [ngClass]="resource.icon"></i> {{getWorkerCount(resource.jid)}}</span>
                             <span class="amounts">{{resource.owned}}</span>
                         </progressbar>
                     </div>

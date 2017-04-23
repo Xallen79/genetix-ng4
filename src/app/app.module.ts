@@ -22,7 +22,8 @@ import { MapComponent } from './map/map.component';
 import { PopulationComponent } from './population/population.component';
 import { GoalListComponent } from './goal-list/goal-list.component';
 import { PopulationPanelComponent } from './population-panel/population-panel.component';
-
+import { BloqHeadDraggableDirective, BloqHeadDropTargetDirective } from './drag-drop/drag-drop.directive';
+import { DragService } from './drag-drop/drag-service.service';
 
 
 
@@ -39,7 +40,9 @@ import { PopulationPanelComponent } from './population-panel/population-panel.co
     MapComponent,
     PopulationComponent,
     GoalListComponent,
-    PopulationPanelComponent
+    PopulationPanelComponent,
+    BloqHeadDraggableDirective,
+    BloqHeadDropTargetDirective
   ],
   imports: [
     BrowserModule,
@@ -50,13 +53,13 @@ import { PopulationPanelComponent } from './population-panel/population-panel.co
     HttpModule,
     UIRouterModule.forRoot({
       states: APP_STATES,
-      useHash: false,
+      useHash: true,
       otherwise: { state: 'main' },
       config: routerConfigFn,
     }),
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  providers: [GameService, LogService, ConfigService],
+  providers: [GameService, LogService, ConfigService, DragService],
   bootstrap: [UIView]
 })
 export class AppModule {
@@ -71,3 +74,16 @@ export function randomIntFromInterval(min: number, max: number, func?) {
   if (func == null) func = Math.random;
   return Math.floor(func() * (max - min + 1) + min);
 }
+
+export let uuid = {
+  new: function (): string {
+    function _p8(s?: boolean) {
+      var p = (Math.random().toString(16) + "000000000").substr(2, 8);
+      return s ? "-" + p.substr(0, 4) + "-" + p.substr(4, 4) : p;
+    }
+    return _p8() + _p8(true) + _p8(true) + _p8();
+  },
+  empty: function () {
+    return '00000000-0000-0000-0000-000000000000';
+  }
+};

@@ -1,5 +1,6 @@
-import { ResourceID, DEFAULT_RESOURCES, Resource, IResourceType } from 'app/config/resourceTypes.config';
+import { DEFAULT_RESOURCES, Resource, IResourceType } from 'app/config/resourceTypes.config';
 import { sprintf } from 'sprintf-js';
+import { ResourceID, BuildingID } from "app/config/types.config";
 export type BuildingUse = 'housing' | 'storage' | 'nursery';
 export const BuildingUse = {
     HOUSING: 'housing' as BuildingUse,
@@ -7,19 +8,6 @@ export const BuildingUse = {
     NURSERY: 'nursery' as BuildingUse
 
 };
-
-export type BuildingID = 'dormitory' | 'nursery' | 'storage_nectar' | 'storage_pollen' | 'storage_water' | 'storage_wax' | 'storage_jelly' | 'storage_honey' | 'storage_food';
-export const BuildingID = {
-    DORMITORY: 'dormitory' as BuildingID,
-    NURSERY: 'nursery' as BuildingID,
-    STORAGE_NECTAR: 'storage_nectar' as BuildingID,
-    STORAGE_POLLEN: 'storage_pollen' as BuildingID,
-    STORAGE_WATER: 'storage_water' as BuildingID,
-    STORAGE_WAX: 'storage_wax' as BuildingID,
-    STORAGE_JELLY: 'storage_jelly' as BuildingID,
-    STORAGE_HONEY: 'storage_honey' as BuildingID,
-    STORAGE_FOOD: 'storage_food' as BuildingID
-}
 
 interface IBuildingType {
     bid: BuildingID;
@@ -127,10 +115,16 @@ export class Building implements IBuildingType {
         }
         return this._size;
     }
-    build(gifted?: boolean) {
-        if (gifted) this.gifted++;
-        else this.purchased++;
+    build(number?: number, gifted?: boolean): INextCost[] {
+        var ret = [];
+        if (!number) number = 1;
+        if (gifted) this.gifted += number;
+        else if (this.canBuild) {
+            ret = this._nextCost;
+            this.purchased += number;
+        }
         this._sizeChanged = true;
+        return ret;
     }
 
 }

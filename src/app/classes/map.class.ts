@@ -18,31 +18,32 @@ export interface IMapState {
 
 interface IMap extends IMapState {
     hives: Hive[];
+    currentHive: Hive;
     mapResources: MapResource[];
     grid: Grid;
     getState(): IMapState;
     generateInitialMap(): void;
     getHiveByPosition(pos: string): Hive;
-    getCurrentHive(): Hive;
     getHiveById(id: number): Hive;
     getBeeById(beeid: string): Bee.BaseBee;
     mapClicked(x: number, y: number): void;
     mapMoved(x: number, y: number): void;
-    setRangGraph(beeid: string): void;
+    setRangeGraph(beeid: string): void;
     handleGameLoop(elapsedMs: number): void;
-    drawMap(context: CanvasRenderingContext2D): void;
+    drawMap(context: CanvasRenderingContext2D, elapsedMs: number): void;
     addHive(position: string): Hive;
     addWaterNode(position: string): MapResource;
     addCloverNode(position: string, level: number): MapResource;
     clear(context: CanvasRenderingContext2D): void;
     drawHexes(context: CanvasRenderingContext2D): void;
     drawResources(context: CanvasRenderingContext2D): void;
-    drawHives(context: CanvasRenderingContext2D): void;
-    drawBees(context: CanvasRenderingContext2D, hive: Hive): void;
+    drawHives(context: CanvasRenderingContext2D, elapsedMs: number): void;
+    drawBees(context: CanvasRenderingContext2D, hive: Hive, elapsedMs: number): void;
 }
 
 export class Map implements IMap {
     hives: Hive[];
+    currentHive: Hive;
     mapResources: MapResource[];
     grid: Grid;
     currentHiveID: number;
@@ -59,8 +60,10 @@ export class Map implements IMap {
         this.stepTimeMs = stepTimeMs;
         if (state) {
             this.grid = new Grid(state.gridConfig);
+            this.currentHiveID = state.currentHiveID;
             for (let h of state.hiveStates) {
                 var hive = new Hive(h);
+                if (this.currentHiveID === hive.id) this.currentHive = hive;
                 for (let b of hive.bees) {
                     for (let nodeid of b.nodeIds)
                         b.nodes.push(this.grid.GetHexById(nodeid))
@@ -75,7 +78,7 @@ export class Map implements IMap {
                     node.bees.push(this.getBeeById(beeid));
                 }
             }
-            this.currentHiveID = state.currentHiveID;
+
         } else {
             this.generateInitialMap();
         }
@@ -119,13 +122,12 @@ export class Map implements IMap {
         this.addCloverNode("A7", 3);
         this.addCloverNode("E7", 3);
         this.currentHiveID = this.hives[0].id;
+        this.currentHive = this.hives[0];
     }
     getHiveByPosition(pos: string): Hive {
         return this.hives.find(hive => hive.pos === pos);
     }
-    getCurrentHive(): Hive {
-        return this.getHiveById(this.currentHiveID);
-    }
+
     getHiveById(id: number): Hive {
         return this.hives.find(hive => hive.id === id);
     }
@@ -159,19 +161,19 @@ export class Map implements IMap {
         var hive = this.getHiveByPosition(hex.id);
         if (hive && hive.id != this.currentHiveID) {
             this.currentHiveID = hive.id;
+            this.currentHive = hive;
             //self.sendHiveChangeEvent();
         }
     }
     mapMoved(x: number, y: number): void {
         this.canvasLocation = new Point(x, y);
     }
-    setRangGraph(beeid: string): void {
+    setRangeGraph(beeid: string): void {
         if (beeid) {
-            var hive = this.getCurrentHive();
-            var bee = hive.getBeeById(beeid);
+            var bee = this.currentHive.getBeeById(beeid);
             var range = bee.getAbility('rng').value;
 
-            var center = this.grid.GetHexById(hive.pos);
+            var center = this.grid.GetHexById(this.currentHive.pos);
             for (let target of this.grid.Hexes) {
                 target.inRange = this.grid.GetHexDistance(center, target) <= range;
             }
@@ -194,11 +196,11 @@ export class Map implements IMap {
             elapsedMs -= this.stepTimeMs;
         }
     }
-    drawMap(context: CanvasRenderingContext2D) {
+    drawMap(context: CanvasRenderingContext2D, elapsedMs: number) {
         this.clear(context);
         this.drawHexes(context);
         this.drawResources(context);
-        this.drawHives(context);
+        this.drawHives(context, elapsedMs);
     }
     addHive(position: string): Hive {
         var id = this.hives.length + 1;
@@ -277,7 +279,7 @@ export class Map implements IMap {
             context.stroke();
         }
     }
-    drawHives(context: CanvasRenderingContext2D): void {
+    drawHives(context: CanvasRenderingContext2D, elapsedMs: number): void {
         for (let hive of this.hives) {
             var hex = this.grid.GetHexById(hive.pos);
             var id = 'H' + hive.id;
@@ -296,14 +298,15 @@ export class Map implements IMap {
             context.textBaseline = 'middle';
             //var textWidth = ctx.measureText(this.Planet.BoundingHex.id);
             context.fillText(id, hex.MidPoint.X, hex.MidPoint.Y);
-            this.drawBees(context, hive);
+            this.drawBees(context, hive, elapsedMs);
         }
     }
-    drawBees(context: CanvasRenderingContext2D, hive: Hive): void {
+    drawBees(context: CanvasRenderingContext2D, hive: Hive, elapsedMs: number): void {
         for (let bee of hive.bees) {
             if (bee.isMoving) {
                 var hexStart = this.grid.GetHexById(bee.tripStart);
                 var hexEnd = this.grid.GetHexById(bee.tripEnd);
+
                 var percentComplete = bee.tripElaspedTime / bee.tripTotalTime;
                 if (isNaN(percentComplete)) percentComplete = 1;
                 var deltaX = hexEnd.MidPoint.X - hexStart.MidPoint.X;

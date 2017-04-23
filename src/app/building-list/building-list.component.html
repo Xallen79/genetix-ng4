@@ -4,11 +4,11 @@
     </h3>
     <div class="player-content">
         <div class="building-list col-xs-12">
-            <div class="scalable-list-button-big" *ngFor="let building of _gameService.map.getCurrentHive().buildings">
+            <div class="scalable-list-button-big" *ngFor="let building of _gameService.map.currentHive.buildings">
                 <div *ngIf="building.getNextCost().length > 0">
                     <!--<div placement="bottom" [tooltip]="costTooltip" container="body" #tool="bs-tooltip" triggers="" (click)="tool.toggle()">-->
                     <div placement="bottom" [tooltip]="costTooltip" container="body">
-                        <button type="button" [disabled]="!building.canBuild" class="btn btn-xs btn-primary" (click)="_gameServe.map.getCurrentHive().build(building)">
+                        <button type="button" [disabled]="!building.canBuild" class="btn btn-xs btn-primary" (click)="_gameService.map.currentHive.build(building)">
                             {{(building.name + ' (' + (building.gifted + building.purchased) + ')')}}
                         </button>
                     </div>

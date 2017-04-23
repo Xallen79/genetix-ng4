@@ -2,13 +2,20 @@ import { Trait } from "app/config/traits.config";
 import { ConfigService } from "app/config/config.service"
 import { Genome } from "app/classes/genome.class";
 import { Hexagon } from "app/classes/hexmap/hexagon.class";
-import { JobType, JobID, JOB_TYPES, JobAction, IJobStep } from "app/config/jobTypes.config";
+import { JobType, JOB_TYPES, JobAction, IJobStep } from "app/config/jobTypes.config";
 import { Hive } from "app/classes/hive.class";
 import { Map } from "app/classes/map.class";
 import { AppInjector, randomIntFromInterval } from "app/app.module";
-import { Ability, AbilityID } from "app/config/abilities.config";
+import { Ability } from "app/config/abilities.config";
 import { LogService } from "app/log/log.component";
-
+import { JobID, AbilityID, ResourceID } from 'app/config/types.config';
+interface IWorkStatus {
+    action: string;
+    value: number;
+    max?: number;
+    rid?: ResourceID,
+    icon?: string
+}
 export interface IBeeState {
     id: string;
     beetype?: BeeTypes;
@@ -37,9 +44,11 @@ export interface IBeeState {
     droneIds?: string[];
     isMoving?: boolean;
     harvesting?: boolean;
+    baskets?: { [rid: string]: number }
 }
 interface IBee extends IBeeState {
     job: JobType;
+    workStatus: IWorkStatus;
     update(state?: IBeeState): void;
     getState(): IBeeState;
     die(): void;
@@ -97,10 +106,12 @@ export abstract class BaseBee implements IBee {
     name?: string;
     genome?: Genome;
     job: JobType;
+    workStatus: IWorkStatus;
     hasPairs: boolean;
     nodes: Hexagon[];
     isMoving?: boolean;
     harvesting?: boolean;
+    baskets?: { [rid: string]: number }
 
     private _configService: ConfigService;
     private _logService: LogService;
@@ -129,6 +140,13 @@ export abstract class BaseBee implements IBee {
         this.isMoving = config && config.isMoving || false;
         this.harvesting = config && config.harvesting || false;
 
+        this.baskets = /*config && config.baskets || this.baskets ||*/ null;
+        if (this.baskets === null) {
+            this.baskets = {};
+            this.baskets[ResourceID.NECTAR] = 0;
+            this.baskets[ResourceID.POLLEN] = 0;
+            this.baskets[ResourceID.WATER] = 0;
+        }
         //this.nodes = this.nodes || [];
         this.nodeIndex = config && config.nodeIndex || this.nodeIndex || 0;
         this.beeMutationChance = config && config.beeMutationChance || this.beeMutationChance || 0.005;
@@ -136,6 +154,7 @@ export abstract class BaseBee implements IBee {
         this.traits = this._configService.getTraits(this.genome);
         this.abilities = this._configService.getAbilities(this.traits);
         this.name = this.beetype + this.id;
+        this.workStatus = null;
     }
     getState(): IBeeState {
         return {
@@ -163,7 +182,8 @@ export abstract class BaseBee implements IBee {
             // abilities: this.abilities,
             genome: this.genome,
             isMoving: this.isMoving,
-            harvesting: this.harvesting
+            harvesting: this.harvesting,
+            baskets: this.baskets
         };
     }
 
@@ -186,11 +206,24 @@ export abstract class BaseBee implements IBee {
     mate(bee: BaseBee): void {
         throw new Error('Method not implemented.');
     }
-    storageAmount(rid: string): number {
-        throw new Error('Method not implemented.');
+    storageAmount(rid: ResourceID): number {
+        let amt: number;
+        switch (rid) {
+            case ResourceID.NECTAR:
+                amt = this.getAbility(AbilityID.STR_NECTAR).value;
+                break;
+            case ResourceID.POLLEN:
+                amt = this.getAbility(AbilityID.STR_POLLEN).value;
+                break;
+            case ResourceID.WATER:
+                amt = this.getAbility(AbilityID.STR_WATER).value;
+                break;
+        }
+        return amt - this.baskets[rid];
+
     }
     storageFull(): boolean {
-        throw new Error('Method not implemented.');
+        return this.storageAmount(ResourceID.NECTAR) + this.storageAmount(ResourceID.POLLEN) + this.storageAmount(ResourceID.WATER) <= 0;
     }
     setJob(jid: JobID, jobStep?: IJobStep): void {
         if (this.jid === jid) return;
@@ -199,7 +232,7 @@ export abstract class BaseBee implements IBee {
         if (job.beetypes.indexOf(this.beetype) === -1) {
             return;
         }
-
+        this.workStatus = null;
         this.jid = jid;
         this.job = job;
         this.msSinceWork = 0;
@@ -210,31 +243,190 @@ export abstract class BaseBee implements IBee {
         this.isMoving = false;
     }
     addWaypointNode(hexagon: Hexagon): void {
-        throw new Error('Method not implemented.');
+        if (this.jid !== JobID.FORAGER) this.setJob(JobID.FORAGER);
+
+        if (this.nodeIds.indexOf(hexagon.id) === -1) {
+            this.nodes.push(hexagon);
+            this.nodeIds.push(hexagon.id);
+        }
     }
     removeWaypointNode(hexagon: Hexagon): void {
-        throw new Error('Method not implemented.');
+        this.nodes.splice(this.nodes.indexOf(hexagon), 1);
+        this.nodeIds.splice(this.nodeIds.indexOf(hexagon.id), 1);
     }
     doSpawn(ms: number, hive: Hive) {
         throw new Error('Method not implemented.');
     }
     doProduce(ms: number, hive: Hive): void {
-        throw new Error('Method not implemented.');
+        var rate = this.getAbility(this.jobStep.rate).value;
+        var ya = this.getAbility(this.jobStep.yield);
+        this.msSinceWork += ms;
+        if (this.msSinceWork >= rate) {
+
+            while (this.msSinceWork >= rate) {
+                var spent = [];
+                var success = false;
+                for (let c of this.jobStep.cost) {
+                    var ca = this.getAbility(c);
+                    success = (hive.changeResource(ca.c_rid, -1 * ca.value) >= 0);
+                    if (success) {
+                        spent.push({ rid: ca.c_rid, amount: ca.value });
+                    } else break;
+                }
+                if (success) {
+                    success = hive.changeResource(ya.rid, ya.value) > 0;
+                }
+
+                // we either didn't have enough resources, or we couldn't make the 
+                // resource, refund anything that was spent
+                if (!success) {
+                    for (let s of spent) {
+                        hive.changeResource(s.rid, s.amount);
+                    }
+                    this.msSinceWork = 0; //no need to keep working
+                } else {
+                    this.msSinceWork -= rate;
+                }
+            }
+        }
+        this.workStatus = { action: this.job.name, value: this.msSinceWork / 1000, max: rate / 1000, rid: ya.rid };
     }
     doTravel(ms: number, hive: Hive, map: Map): void {
-        throw new Error('Method not implemented.');
+        var mr = this.nodes[this.nodeIndex].mapResource;
+        if (this.tripStart !== this.pos) {
+            this.isMoving = true;
+            var rate = this.getAbility(this.jobStep.rate).value;
+            this.tripStart = this.pos;
+            this.tripElaspedTime = 0;
+            this.tripEnd = this.nodes[this.nodeIndex].id;
+            this.tripTotalTime = map.grid.GetHexDistance(this.nodes[this.nodeIndex], map.grid.GetHexById(this.tripStart)) * rate;
+        }
+        this.tripElaspedTime += ms;
+        if (this.tripElaspedTime >= this.tripTotalTime) {
+            this.isMoving = false;
+            this.jobStep = this.job.actions.find(a => a.action === JobAction.COLLECT);
+            this.msSinceWork = 0;
+            this.tripStart = null;
+            this.pos = this.nodes[this.nodeIndex].id;
+            mr.queueHarvest(this);
+        }
+        var rid = mr.water > 0 ? ResourceID.WATER : ResourceID.POLLEN;
+        this.workStatus = { action: "Travelling to " + this.tripEnd, value: this.tripElaspedTime / 1000, max: this.tripTotalTime / 1000, rid: rid };
     }
     doCollect(ms: number, hive: Hive, map: Map): void {
-        throw new Error('Method not implemented.');
+        if (this.waitingAtResource) {
+            this.workStatus = { action: "Waiting at resource", value: 0, max: 0 };
+            return;
+        }
+        var resourceNode = this.nodes[this.nodeIndex].mapResource;
+        var rate = this.getAbility(this.jobStep.rate).value * resourceNode.harvestMultiplier;
+        this.msSinceWork += ms;
+        while (this.msSinceWork >= rate) {
+            var collected = false;
+            var rid = ResourceID.NECTAR;
+            if (resourceNode.getAvailable(rid) > 0 && this.storageAmount(rid) > 0) {
+                this.baskets[rid] += resourceNode.collect(rid, 1);
+                collected = true;
+            }
+            rid = ResourceID.POLLEN;
+            if (!collected && resourceNode.getAvailable(rid) > 0 && this.storageAmount(rid) > 0) {
+                this.baskets[rid] += resourceNode.collect(rid, 1);
+                collected = true;
+            }
+            rid = ResourceID.WATER;
+            if (!collected && resourceNode.getAvailable(rid) > 0 && this.storageAmount(rid) > 0) {
+                this.baskets[rid] += resourceNode.collect(rid, 1);
+                collected = true;
+            }
+            if (!collected) {
+                this._logService.logWorkMessage(this.name + " done harvesting.");
+                this.harvesting = false;
+                this.nodes[this.nodeIndex].mapResource.doneHarvesting();
+                this.msSinceWork -= rate;
+                if (this.nodeIndex + 1 === this.nodes.length) {
+                    this.nodeIndex = 0;
+                    this.goHome(0, hive, map);
+                } else if (this.storageFull()) {
+                    this.goHome(0, hive, map);
+                } else {
+                    this.jobStep = this.job.actions.find(a => a.action === JobAction.TRAVEL);
+                    this.nodeIndex++;
+                }
+            } else {
+                this.msSinceWork -= rate;
+            }
+
+        }
+        this.workStatus = { action: "Collecting", value: this.msSinceWork / 1000, max: rate / 1000 };
     }
     doDeposit(ms: number, hive: Hive): void {
-        throw new Error('Method not implemented.');
+        var rate = this.getAbility(this.jobStep.rate).value;
+        this.msSinceWork += ms;
+        if (this.msSinceWork >= rate) {
+            var deposited = false;
+            var rid = ResourceID.NECTAR;
+            if (this.baskets[rid] > 0) {
+                if (hive.changeResource(rid, 1) >= 0) {
+                    this.baskets[rid]--;
+                    deposited = true;
+                }
+            }
+            rid = ResourceID.POLLEN;
+            if (this.baskets[rid] > 0) {
+                if (hive.changeResource(rid, 1) >= 0) {
+                    this.baskets[rid]--;
+                    deposited = true;
+                }
+            }
+            rid = ResourceID.WATER;
+            if (this.baskets[rid] > 0) {
+                if (hive.changeResource(rid, 1) >= 0) {
+                    this.baskets[rid]--;
+                    deposited = true;
+                }
+            }
+            if (!deposited) {
+                this.jobStep = this.job.actions.find(a => a.action === JobAction.TRAVEL)
+            }
+            this.msSinceWork -= rate;
+        }
+        this.workStatus = { action: "Depositing", value: this.msSinceWork / 1000, max: rate / 1000 };
     }
     goHome(ms: number, hive: Hive, map: Map): void {
-        if (this.pos === hive.pos) this.jobStep = this.job.actions[0];
+
+
+        if (this.tripStart !== this.pos) {
+            this.jobStep = null;
+            var rate = this.getAbility(AbilityID.SPD_FLY).value;
+            this.tripStart = this.pos;
+            this.tripElaspedTime = 0;
+            this.tripEnd = hive.pos;
+            this.tripTotalTime = map.grid.GetHexDistance(map.grid.GetHexById(this.tripEnd), map.grid.GetHexById(this.tripStart)) * rate;
+            this.isMoving = true;
+        }
+        this.tripElaspedTime += ms;
+        if (this.tripElaspedTime >= this.tripTotalTime) {
+            this.isMoving = false;
+            //var jobType = jobTypes[this.jid];
+            this.jobStep = this.job.actions[0];
+            this.msSinceWork = 0;
+            this.tripStart = null;
+            this.pos = this.tripEnd;
+
+            //var jobStepIndex = this.jobStepIndex;
+            if (this.job.jid === JobID.FORAGER) {
+                this._logService.logWorkMessage(this.name + ' returned home.');
+                this.jobStep = this.job.actions.find(a => a.action === JobAction.DEPOSIT);
+            }
+        }
+        if (this.job.jid === JobID.IDLE)
+            this.workStatus = { action: this.job.name, value: 0, max: 0 };
+        else
+            this.workStatus = { action: "Going Home", value: this.tripElaspedTime / 1000, max: this.tripTotalTime / 1000 };
+
     }
     doWork(ms: number, hive: Hive, map: Map): void {
-        if (this.jobStep === null) {
+        if (!this.jobStep) {
             this.goHome(ms, hive, map);
             return;
         }
@@ -262,6 +454,7 @@ export abstract class BaseBee implements IBee {
                     this.doDeposit(ms, hive);
                 }
                 break;
+            case JobID.GUARD:
             default:
                 this.msSinceWork = 0;
                 break;
@@ -341,6 +534,7 @@ export class Queen extends BaseBee {
                 this.msSinceWork -= eggRate;
             }
         }
+        this.workStatus = { action: "Laying Eggs", value: this.msSinceWork / 1000, max: eggRate / 1000, rid: ResourceID.ROYAL_JELLY };
     }
     layEgg = function (newId) {
         var eggGenome = this.genome.getEggGenome();
