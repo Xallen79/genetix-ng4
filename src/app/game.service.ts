@@ -31,14 +31,14 @@ export class GameService {
         var now = Date.now();
         if (this._animationRequest) window.cancelAnimationFrame(this._animationRequest);
         this._logService.clearLog("Welcome to Genetix!");
-        var s = localStorage.getItem(this.gameSaveKey)
+        var s = localStorage.getItem(this.gameSaveKey);
         var json = LZString.decompressFromBase64(s);
         this.lastSave = s;
         var savedState = json ? JSON.parse(json) : null;
         this.saveTime = savedState && savedState.saveTime || now;
         this.lastTime = null;
         this.map = null;
-        this.stepTimeMs = 50 || savedState && savedState.stepTimeMs || 50;
+        this.stepTimeMs = 66 || savedState && savedState.stepTimeMs || 50;
         if (savedState && savedState.map) {
             this.map = new Map(this.stepTimeMs, savedState.map);
         } else {

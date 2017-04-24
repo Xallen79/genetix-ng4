@@ -113,7 +113,7 @@ export abstract class BaseBee implements IBee {
     isMoving?: boolean;
     harvesting?: boolean;
     baskets?: { [rid: string]: number }
-
+    heading?: number;
     private _configService: ConfigService;
     private _logService: LogService;
 
@@ -303,6 +303,7 @@ export abstract class BaseBee implements IBee {
     doTravel(ms: number, hive: Hive, map: Map): void {
         var mr = this.nodes[this.nodeIndex].mapResource;
         if (this.tripStart !== this.pos) {
+            this.heading = null;
             this.isMoving = true;
             var rate = this.getAbility(this.jobStep.rate).value;
             this.tripStart = this.pos;

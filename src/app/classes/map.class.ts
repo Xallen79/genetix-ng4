@@ -50,6 +50,7 @@ export class Map implements IMap {
     selectedHexID: string;
     canvasLocation: Point;
     stepTimeMs: number;
+    beeImg: HTMLImageElement;
     private Q_PI: number = Math.PI / 4;
     private TWO_PI: number = Math.PI * 2;
     private _configService: ConfigService;
@@ -302,35 +303,47 @@ export class Map implements IMap {
         }
     }
     drawBees(context: CanvasRenderingContext2D, hive: Hive, elapsedMs: number): void {
+        var scale = 1.5;
+        var side = this.grid.config.hexConfig.SIDE / scale;
         for (let bee of hive.bees) {
             if (bee.isMoving) {
                 var hexStart = this.grid.GetHexById(bee.tripStart);
                 var hexEnd = this.grid.GetHexById(bee.tripEnd);
 
-                var percentComplete = bee.tripElaspedTime / bee.tripTotalTime;
-                if (isNaN(percentComplete)) percentComplete = 1;
+                var percentComplete = 1;
+                if (bee.tripTotalTime !== 0)
+                    percentComplete = bee.tripElaspedTime / bee.tripTotalTime;
+
+
                 var deltaX = hexEnd.MidPoint.X - hexStart.MidPoint.X;
                 var deltaY = hexEnd.MidPoint.Y - hexStart.MidPoint.Y;
-                var rads = Math.atan2(deltaY, deltaX);
+                if (!bee.heading)
+                    bee.heading = Math.atan2(deltaY, deltaX) + 2 * this.Q_PI;
                 var coordX = hexStart.MidPoint.X + ((deltaX) * percentComplete);
                 var coordY = hexStart.MidPoint.Y + ((deltaY) * percentComplete);
 
-                context.fillStyle = 'yellow';
-                context.beginPath();
-                context.arc(coordX, coordY, this.grid.config.hexConfig.HEIGHT * 0.2, rads - this.Q_PI, rads + this.Q_PI, true);
-                context.closePath();
-                context.fill();
-                context.lineWidth = 1;
-                context.strokeStyle = 'black';
-                context.stroke();
+                context.save();
+                context.translate(coordX, coordY);
+                context.rotate(bee.heading);
+                context.drawImage(this.beeImg, side / -2, side / -2, side, side);
+                context.restore();
 
-                context.fillStyle = 'black';
-                context.font = "bolder 6pt Trebuchet MS,Tahoma,Verdana,Arial,sans-serif";
-                context.textAlign = "center";
-                context.textBaseline = 'middle';
-                //var textWidth = ctx.measureText(this.Planet.BoundingHex.id);
-                context.fillText(bee.id, coordX, coordY);
-            }
+                // context.fillStyle = 'yellow';
+                // context.beginPath();
+                // context.arc(coordX, coordY, this.grid.config.hexConfig.HEIGHT * 0.2, rads - this.Q_PI, rads + this.Q_PI, true);
+                // context.closePath();
+                // context.fill();
+                // context.lineWidth = 1;
+                // context.strokeStyle = 'black';
+                // context.stroke();
+
+                // context.fillStyle = 'black';
+                // context.font = "bolder 6pt Trebuchet MS,Tahoma,Verdana,Arial,sans-serif";
+                // context.textAlign = "center";
+                // context.textBaseline = 'middle';
+                // //var textWidth = ctx.measureText(this.Planet.BoundingHex.id);
+                // context.fillText(bee.id, coordX, coordY);
+            } else bee.heading = null;
         }
     }
 

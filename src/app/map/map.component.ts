@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewChecked, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, AfterViewChecked, OnDestroy, HostListener, NgZone } from '@angular/core';
 import { GameService } from 'app/game.service';
 import { IGridConfig } from 'app/classes/hexmap/grid.class';
 import { Subscription } from "rxjs/Subscription";
@@ -35,7 +35,7 @@ export class MapComponent implements OnInit, OnDestroy {
   imagesLoaded: boolean = false;
   fps: number = 0;
   smoothing: number = 0.99;
-  constructor(public _gameService: GameService) {
+  constructor(public _gameService: GameService, private ngZone: NgZone) {
     this.mapconfig = _gameService.map.grid.config;
 
   }
@@ -79,15 +79,18 @@ export class MapComponent implements OnInit, OnDestroy {
   setupCanvas() {
     this.canvas = <HTMLCanvasElement>document.getElementById('map');
     this.context = this.canvas.getContext('2d');
-
+    this._gameService.map.beeImg = this.images['bee.svg'];
     this.gameLoopSub = this._gameService.animationEvent$.subscribe(elapsedMs => {
+      this.ngZone.runOutsideAngular(() => {
+        if (elapsedMs > 0) {
+          var instantFps = 1 / (elapsedMs / 1000);
+          if (this.fps === 0) this.fps = instantFps;
+          this.fps = (this.fps * this.smoothing) + (instantFps * (1.0 - this.smoothing));
+        }
 
-      if (elapsedMs > 0) {
-        var instantFps = 1 / (elapsedMs / 1000);
-        if (this.fps === 0) this.fps = instantFps;
-        this.fps = (this.fps * this.smoothing) + (instantFps * (1.0 - this.smoothing));
-      }
-      this.draw(elapsedMs);
+        this.draw(elapsedMs);
+      });
+
     });
 
     this.setHexSize(this.mapconfig.hexConfig.HEIGHT);
