@@ -9,6 +9,7 @@ import { AppInjector, randomIntFromInterval } from "app/app.module";
 import { Ability } from "app/config/abilities.config";
 import { LogService } from "app/log/log.component";
 import { JobID, AbilityID, ResourceID } from 'app/config/types.config';
+import { MapResource } from "app/classes/map-resource.class";
 interface IWorkStatus {
     action: string;
     value: number;
@@ -225,6 +226,9 @@ export abstract class BaseBee implements IBee {
     storageFull(): boolean {
         return this.storageAmount(ResourceID.NECTAR) + this.storageAmount(ResourceID.POLLEN) + this.storageAmount(ResourceID.WATER) <= 0;
     }
+    storageEmpty(): boolean {
+        return this.baskets[ResourceID.NECTAR] + this.baskets[ResourceID.POLLEN] + this.baskets[ResourceID.WATER] <= 0;
+    }
     setJob(jid: JobID, jobStep?: IJobStep): void {
         if (this.jid === jid) return;
 
@@ -268,22 +272,27 @@ export abstract class BaseBee implements IBee {
                 var success = false;
                 for (let c of this.jobStep.cost) {
                     var ca = this.getAbility(c);
-                    success = (hive.changeResource(ca.c_rid, -1 * ca.value) >= 0);
+                    var result = hive.changeResource(ca.c_rid, -1 * ca.value);
+                    success = result.error !== -1 && result.stored === -1 * ca.value;
                     if (success) {
                         spent.push({ rid: ca.c_rid, amount: ca.value });
                     } else break;
                 }
                 if (success) {
-                    success = hive.changeResource(ya.rid, ya.value) > 0;
+                    var result = hive.changeResource(ya.rid, ya.value);
+                    success = result.error !== -1 && result.stored === ya.value;
+                    if (!success) hive.changeResource(ya.rid, -1 * result.stored);
                 }
 
-                // we either didn't have enough resources, or we couldn't make the 
-                // resource, refund anything that was spent
+                // we either didn't have enough resources, or we couldn't store the 
+                // resources, refund anything that was spent
                 if (!success) {
                     for (let s of spent) {
                         hive.changeResource(s.rid, s.amount);
                     }
-                    this.msSinceWork = 0; //no need to keep working
+                    //no need to keep working
+                    this.msSinceWork = rate;
+                    break;
                 } else {
                     this.msSinceWork -= rate;
                 }
@@ -357,40 +366,72 @@ export abstract class BaseBee implements IBee {
             }
 
         }
-        this.workStatus = { action: "Collecting", value: this.msSinceWork / 1000, max: rate / 1000 };
+        //this.workStatus = { action: "Collecting", value: this.msSinceWork / 1000, max: rate / 1000 };
+        this.workStatus = { action: "Collecting", rid: this.getCollectRid(resourceNode), value: this.msSinceWork / 1000, max: rate / 1000 };
+    }
+    getCollectRid(resourceNode: MapResource): ResourceID {
+        return this.storageAmount(ResourceID.NECTAR) > 0 && resourceNode.getAvailable(ResourceID.NECTAR) > 0 ? ResourceID.NECTAR
+            : this.storageAmount(ResourceID.POLLEN) > 0 && resourceNode.getAvailable(ResourceID.POLLEN) > 0 ? ResourceID.POLLEN
+                : this.storageAmount(ResourceID.WATER) > 0 && resourceNode.getAvailable(ResourceID.WATER) > 0 ? ResourceID.WATER : null;
+    }
+    getDepositRid(hive: Hive): ResourceID {
+        var nectar = hive.resources.find(r => r.rid === ResourceID.NECTAR);
+        var pollen = hive.resources.find(r => r.rid === ResourceID.POLLEN);
+        var water = hive.resources.find(r => r.rid === ResourceID.WATER);
+        var deposit = this.baskets[ResourceID.NECTAR] > 0 && nectar.owned < nectar.max ? ResourceID.NECTAR
+            : this.baskets[ResourceID.POLLEN] > 0 && pollen.owned < pollen.max ? ResourceID.POLLEN
+                : this.baskets[ResourceID.WATER] > 0 && water.owned < water.max ? ResourceID.WATER
+                    : this.baskets[ResourceID.NECTAR] > 0 ? ResourceID.NECTAR
+                        : this.baskets[ResourceID.POLLEN] > 0 ? ResourceID.POLLEN
+                            : this.baskets[ResourceID.WATER] > 0 ? ResourceID.WATER : null;
+        return deposit;
     }
     doDeposit(ms: number, hive: Hive): void {
         var rate = this.getAbility(this.jobStep.rate).value;
         this.msSinceWork += ms;
-        if (this.msSinceWork >= rate) {
+        while (this.msSinceWork >= rate) {
             var deposited = false;
             var rid = ResourceID.NECTAR;
             if (this.baskets[rid] > 0) {
-                if (hive.changeResource(rid, 1) >= 0) {
+                var result = hive.changeResource(rid, 1);
+                if (result.error !== -1 && result.stored === 1) {
                     this.baskets[rid]--;
                     deposited = true;
+                    this.workStatus.rid = rid;
                 }
             }
             rid = ResourceID.POLLEN;
-            if (this.baskets[rid] > 0) {
-                if (hive.changeResource(rid, 1) >= 0) {
+            if (this.baskets[rid] > 0 && !deposited) {
+                var result = hive.changeResource(rid, 1);
+                if (result.error !== -1 && result.stored === 1) {
                     this.baskets[rid]--;
                     deposited = true;
+                    this.workStatus.rid = rid;
                 }
             }
             rid = ResourceID.WATER;
-            if (this.baskets[rid] > 0) {
-                if (hive.changeResource(rid, 1) >= 0) {
+            if (this.baskets[rid] > 0 && !deposited) {
+                var result = hive.changeResource(rid, 1);
+                if (result.error !== -1 && result.stored === 1) {
                     this.baskets[rid]--;
                     deposited = true;
+                    this.workStatus.rid = rid;
                 }
             }
-            if (!deposited) {
-                this.jobStep = this.job.actions.find(a => a.action === JobAction.TRAVEL)
+            if (!deposited && !this.storageFull()) {
+                this.jobStep = this.job.actions.find(a => a.action === JobAction.TRAVEL);
+                this.msSinceWork = 0;
             }
-            this.msSinceWork -= rate;
+            if (deposited)
+                this.msSinceWork -= rate;
+            else {
+                this.msSinceWork = rate;
+                break;
+            }
+
         }
-        this.workStatus = { action: "Depositing", value: this.msSinceWork / 1000, max: rate / 1000 };
+        this.workStatus = { action: "Depositing", rid: this.getDepositRid(hive), value: this.msSinceWork / 1000, max: rate / 1000 };
+
     }
     goHome(ms: number, hive: Hive, map: Map): void {
 
@@ -416,7 +457,10 @@ export abstract class BaseBee implements IBee {
             //var jobStepIndex = this.jobStepIndex;
             if (this.job.jid === JobID.FORAGER) {
                 this._logService.logWorkMessage(this.name + ' returned home.');
-                this.jobStep = this.job.actions.find(a => a.action === JobAction.DEPOSIT);
+                if (!this.storageEmpty())
+                    this.jobStep = this.job.actions.find(a => a.action === JobAction.DEPOSIT);
+                else
+                    this.jobStep = this.job.actions.find(a => a.action === JobAction.TRAVEL);
             }
         }
         if (this.job.jid === JobID.IDLE)

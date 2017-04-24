@@ -33,7 +33,7 @@ interface IHive extends IHiveState {
     loadBees(state: IHiveState): void;
     createInitialQueen(inseminate: boolean): void;
     updateResources(state: IHiveState): void;
-    changeResource(rid: ResourceID, amount: number): number;
+    changeResource(rid: ResourceID, amount: number): any;
     updateBuildings(state: IHiveState): void;
     getNextId(): string;
     assignBee(bee: Bee.BaseBee, type: Bee.BeeTypes): void;
@@ -181,9 +181,9 @@ export class Hive implements IHive {
         }
         // else do nothing, nothing in the state and this hive already has resources
     }
-    changeResource(rid: ResourceID, amount: number): number {
+    changeResource(rid: ResourceID, amount: number): any {
         var r = this.resources.find(r => r.rid === rid);
-
+        var error: number = 0;
         r.owned += amount;
         var actualAmount = amount;
         if (r.max != -1 && r.owned > r.max) {
@@ -193,12 +193,12 @@ export class Hive implements IHive {
         // if this puts us negative, we cannot deduct the amount, reset and return -1 to indicate failure.
         if (r.owned < 0) {
             r.owned -= amount;
-            return -1;
+            error = -1;
         }
-        // we didn't actually add anything, return -2
-        if (actualAmount === 0) return -2;
-        this.updateBuildings();
-        return r.owned;
+        else {
+            this.updateBuildings();
+        }
+        return { owned: r.owned, stored: actualAmount, error: error };
 
     }
     build(building: Building) {

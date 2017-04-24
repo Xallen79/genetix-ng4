@@ -108,7 +108,7 @@ export class Building implements IBuildingType {
     getSize(): number {
         if (this._sizeChanged) {
             if (this.gifted + this.purchased > 0)
-                this._size = Math.floor(this.size.base * Math.pow(1 + (this.size.percent / 100), (this.gifted + this.purchased - 1)));
+                this._size = Math.ceil(this.size.base * Math.pow(1 + (this.size.percent / 100), (this.gifted + this.purchased - 1)));
             else
                 this._size = 0;
             this._sizeChanged = false;
