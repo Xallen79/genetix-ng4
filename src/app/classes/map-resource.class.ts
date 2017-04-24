@@ -54,6 +54,7 @@ export class MapResource implements IMapResource {
     beeids: string[];
     bees: Bee.BaseBee[];
     name: string;
+    routeIndex: number;
 
     constructor(state?: IMapResourceState) {
         this.id = state && state.id || 0;

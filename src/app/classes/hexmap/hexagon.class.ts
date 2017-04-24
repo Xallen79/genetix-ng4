@@ -39,6 +39,7 @@ export class Hexagon implements IHexagon {
     selected: boolean;
     config: IHexagonConfig;
     inRange: boolean;
+    inRoute: boolean;
     Points?: Point[];
     TopLeftPoint: Point;
     MidPoint: Point;
@@ -54,6 +55,7 @@ export class Hexagon implements IHexagon {
         this.row = row;
         this.selected = false;
         this.inRange = false;
+        this.inRoute = false;
         this.Relocate(this.config);
 
     }
@@ -84,14 +86,16 @@ export class Hexagon implements IHexagon {
     }
     draw = function (ctx: CanvasRenderingContext2D, SHOW_HEX_ID: boolean, SHOW_HEX_XY: boolean): void {
 
-        if (this.selected)
-            ctx.fillStyle = "#7283BA";
+        if (this.inRoute)
+            ctx.fillStyle = "aqua";
         else if (this.inRange)
             ctx.fillStyle = "tomato"; // love this color
+        else if (this.selected)
+            ctx.fillStyle = "#7283BA";
         else
-            ctx.fillStyle = "#EDC867";
+            ctx.fillStyle = "#63422B";
 
-        ctx.strokeStyle = "black";
+        ctx.strokeStyle = "#FFE200";
         ctx.lineWidth = this.config.STROKEWIDTH;
         ctx.beginPath();
         ctx.moveTo(this.Points[0].X, this.Points[0].Y);

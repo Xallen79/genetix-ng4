@@ -178,11 +178,19 @@ export class Map implements IMap {
             for (let target of this.grid.Hexes) {
                 target.inRange = this.grid.GetHexDistance(center, target) <= range;
             }
-
+            var i = 0;
+            for (let node of bee.nodes) {
+                node.inRoute = true;
+                node.mapResource.routeIndex = ++i;
+            }
 
         } else {
             for (let hex of this.grid.Hexes) {
                 hex.inRange = false;
+                hex.inRoute = false;
+            }
+            for (let resource of this.mapResources) {
+                resource.routeIndex = null;
             }
         }
     }
@@ -278,6 +286,14 @@ export class Map implements IMap {
             context.lineWidth = 2;
             context.strokeStyle = 'black';
             context.stroke();
+            if (resource.routeIndex) {
+                context.fillStyle = 'white';
+                context.font = "bolder 8pt Trebuchet MS,Tahoma,Verdana,Arial,sans-serif";
+                context.textAlign = "center";
+                context.textBaseline = 'middle';
+                //var textWidth = ctx.measureText(this.Planet.BoundingHex.id);
+                context.fillText(resource.routeIndex + "", hex.MidPoint.X, hex.MidPoint.Y);
+            }
         }
     }
     drawHives(context: CanvasRenderingContext2D, elapsedMs: number): void {

@@ -59,11 +59,8 @@ export class GameService {
         this.saveTime = now;
         this._animationRequest = null;
         if (this.lastTime == null) this.lastTime = runningTime;
-        var steps = 0;
-        while (runningTime - this.lastTime >= (this.stepTimeMs * (steps + 1))) {
-            steps++;
+        var steps = Math.floor((runningTime - this.lastTime) / this.stepTimeMs);
 
-        }
         let elapsedMs: number = (this.stepTimeMs * steps);
         this.lastTime += elapsedMs;
         if (this._running.value && steps > 0) {

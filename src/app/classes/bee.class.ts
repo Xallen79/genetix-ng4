@@ -252,6 +252,8 @@ export abstract class BaseBee implements IBee {
         if (this.nodeIds.indexOf(hexagon.id) === -1) {
             this.nodes.push(hexagon);
             this.nodeIds.push(hexagon.id);
+        } else {
+            this.removeWaypointNode(hexagon);
         }
     }
     removeWaypointNode(hexagon: Hexagon): void {
@@ -301,6 +303,10 @@ export abstract class BaseBee implements IBee {
         this.workStatus = { action: this.job.name, value: this.msSinceWork / 1000, max: rate / 1000, rid: ya.rid };
     }
     doTravel(ms: number, hive: Hive, map: Map): void {
+        if (this.nodeIds.length === 0) {
+            this.setJob(JobID.IDLE);
+            return;
+        }
         var mr = this.nodes[this.nodeIndex].mapResource;
         if (this.tripStart !== this.pos) {
             this.heading = null;
@@ -324,6 +330,10 @@ export abstract class BaseBee implements IBee {
         this.workStatus = { action: "Travelling to " + this.tripEnd, value: this.tripElaspedTime / 1000, max: this.tripTotalTime / 1000, rid: rid };
     }
     doCollect(ms: number, hive: Hive, map: Map): void {
+        if (this.nodeIds.length === 0) {
+            this.setJob(JobID.IDLE);
+            return;
+        }
         if (this.waitingAtResource) {
             this.workStatus = { action: "Waiting at resource", value: 0, max: 0 };
             return;

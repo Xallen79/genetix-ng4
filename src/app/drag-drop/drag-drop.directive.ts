@@ -36,6 +36,7 @@ export class BloqHeadDraggableDirective implements OnInit {
     @HostListener('dragstart', ['$event'])
     dragStart(e) {
         var oe = e.orignalEvent || e;
+        oe.stopPropagation();
 
         if (oe.dataTransfer)
             oe.dataTransfer.setData('text/plain', this.data);
@@ -45,7 +46,7 @@ export class BloqHeadDraggableDirective implements OnInit {
         this.dragService.dragData = this.data;
         this.dragService.dropTargetIds = this.dropTargetIds;
 
-        oe.stopPropagation();
+
         this.onDragStart.emit(oe);
         this.dragService.onDragStart.next();
 

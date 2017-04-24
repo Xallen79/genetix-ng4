@@ -107,11 +107,12 @@ export class MapComponent implements OnInit, OnDestroy {
 
   @HostListener('mousedown', ['$event'])
   mousedown(event: MouseEvent) {
+    if ((<Element>event.target).id === 'map') {
+      if (event.button === 0)
+        this.mouseMoved = false;
 
-    if (event.button === 0)
-      this.mouseMoved = false;
-
-    return false;
+      return false;
+    }
   }
 
   @HostListener('mouseup', ['$event'])
@@ -125,11 +126,13 @@ export class MapComponent implements OnInit, OnDestroy {
 
   @HostListener('mousemove', ['$event'])
   mousemove(event: MouseEvent) {
-    if (event.buttons === 1 && (Math.abs(event.movementX) > 0.1 || Math.abs(event.movementY) > 0.1)) {
-      this.mouseMoved = true;
-      this.moveCanvasBy(event.movementX, event.movementY);
+    if ((<Element>event.target).id === 'map') {
+      if (event.buttons === 1 && (Math.abs(event.movementX) > 0.1 || Math.abs(event.movementY) > 0.1)) {
+        this.mouseMoved = true;
+        this.moveCanvasBy(event.movementX, event.movementY);
+      }
+      return false;
     }
-    return false;
 
   }
 
