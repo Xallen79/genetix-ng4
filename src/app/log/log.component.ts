@@ -26,6 +26,7 @@ class LogMessage {
 export class LogService {
     maxMessages: number = 500;
     messages: LogMessage[];
+    enabled: boolean = true;
     /**
      *
      */
@@ -38,35 +39,34 @@ export class LogService {
         if (initMessage != null) this.logGeneralMessage(initMessage);
     }
     logGeneralMessage(message) {
-        this.messages.push(new LogMessage({ type: LogType.GENERAL, timestamp: Date.now(), message: message }));
-        if (this.messages.length > this.maxMessages)
-            this.messages.splice(0, 1);
-        //$rootScope.$emit('newMessageEvent', self.messages);
+        if (this.enabled) {
+            this.messages.push(new LogMessage({ type: LogType.GENERAL, timestamp: Date.now(), message: message }));
+            if (this.messages.length > this.maxMessages)
+                this.messages.splice(0, 1);
+        }
+
     };
     logBreedMessage(message) {
-        this.messages.push({ type: LogType.BREED, timestamp: Date.now(), message: message });
-        if (this.messages.length > this.maxMessages)
-            this.messages.splice(0, 1);
-        //$rootScope.$emit('newMessageEvent', self.messages);
+        if (this.enabled) {
+            this.messages.push({ type: LogType.BREED, timestamp: Date.now(), message: message });
+            if (this.messages.length > this.maxMessages)
+                this.messages.splice(0, 1);
+        }
     };
     logAchievementMessage(message) {
-        this.messages.push({ type: LogType.ACHIEVEMENT, timestamp: Date.now(), message: message });
-        if (this.messages.length > this.maxMessages)
-            this.messages.splice(0, 1);
-        //$rootScope.$emit('newMessageEvent', self.messages);
+        if (this.enabled) {
+            this.messages.push({ type: LogType.ACHIEVEMENT, timestamp: Date.now(), message: message });
+            if (this.messages.length > this.maxMessages)
+                this.messages.splice(0, 1);
+        }
     };
     logWorkMessage(message) {
-        this.messages.push({ type: LogType.WORK, timestamp: Date.now(), message: message });
-        if (this.messages.length > this.maxMessages)
-            this.messages.splice(0, 1);
-        //$rootScope.$emit('newMessageEvent', self.messages);
+        if (this.enabled) {
+            this.messages.push({ type: LogType.WORK, timestamp: Date.now(), message: message });
+            if (this.messages.length > this.maxMessages)
+                this.messages.splice(0, 1);
+        }
     };
-
-    // self.SubscribeNewMessageEvent = function(scope, callback) {
-    //     var handler = $rootScope.$on('newMessageEvent', callback.bind(this));
-    //     scope.$on('$destroy', handler);
-    //     $rootScope.$emit('newMessageEvent', self.messages);
-    // };
 }
 
 @Component({

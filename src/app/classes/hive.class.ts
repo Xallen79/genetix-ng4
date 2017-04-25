@@ -42,6 +42,7 @@ interface IHive extends IHiveState {
 
 }
 export class Hive implements IHive {
+    resourcesMap: {};
 
     beeStates: Bee.IBeeState[];
 
@@ -173,16 +174,22 @@ export class Hive implements IHive {
             this.resources = [];
             for (let r of state.resources) {
                 var res = new Resource(r);
-                // res.max = 1000;
-                // res.owned = 10;
                 this.resources.push(res);
-
             }
         }
         // else do nothing, nothing in the state and this hive already has resources
+        this.resourcesMap = this.resources.reduce(function (map, res) {
+            map[res.rid] = res;
+            return map;
+        }, {});
+    }
+    storageSpace(rid: ResourceID): number {
+        var r = this.resources.find(r => r.rid === rid);
+        return r.max !== -1 ? r.max - r.owned : -1;
     }
     changeResource(rid: ResourceID, amount: number): any {
-        var r = this.resources.find(r => r.rid === rid);
+        //var r = this.resources.find(r => r.rid === rid);
+        let r = this.resourcesMap[rid];
         var error: number = 0;
         r.owned += amount;
         var actualAmount = amount;
@@ -193,9 +200,10 @@ export class Hive implements IHive {
         // if this puts us negative, we cannot deduct the amount, reset and return -1 to indicate failure.
         if (r.owned < 0) {
             r.owned -= amount;
+            actualAmount = 0;
             error = -1;
         }
-        else {
+        if (error === 0 && actualAmount !== 0) {
             this.updateBuildings();
         }
         return { owned: r.owned, stored: actualAmount, error: error };
@@ -276,7 +284,6 @@ export class Hive implements IHive {
 
         if (ms === 0)
             return;
-
 
         for (let bee of this.bees) {
             bee.doWork(ms, this, map);

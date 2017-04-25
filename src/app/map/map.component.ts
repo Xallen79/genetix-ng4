@@ -79,7 +79,6 @@ export class MapComponent implements OnInit, OnDestroy {
   setupCanvas() {
     this.canvas = <HTMLCanvasElement>document.getElementById('map');
     this.context = this.canvas.getContext('2d');
-    this._gameService.map.beeImg = this.images['bee.svg'];
     this.gameLoopSub = this._gameService.animationEvent$.subscribe(elapsedMs => {
       this.ngZone.runOutsideAngular(() => {
         if (elapsedMs > 0) {
@@ -87,7 +86,8 @@ export class MapComponent implements OnInit, OnDestroy {
           if (this.fps === 0) this.fps = instantFps;
           this.fps = (this.fps * this.smoothing) + (instantFps * (1.0 - this.smoothing));
         }
-
+        if (!this._gameService.map.beeImg)
+          this._gameService.map.beeImg = this.images['bee.svg'];
         this.draw(elapsedMs);
       });
 

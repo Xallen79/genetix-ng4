@@ -114,6 +114,7 @@ export abstract class BaseBee implements IBee {
     harvesting?: boolean;
     baskets?: { [rid: string]: number }
     heading?: number;
+    abilitiesMap: {};
     private _configService: ConfigService;
     private _logService: LogService;
 
@@ -141,7 +142,7 @@ export abstract class BaseBee implements IBee {
         this.isMoving = config && config.isMoving || false;
         this.harvesting = config && config.harvesting || false;
 
-        this.baskets = /*config && config.baskets || this.baskets ||*/ null;
+        this.baskets = config && config.baskets || this.baskets || null;
         if (this.baskets === null) {
             this.baskets = {};
             this.baskets[ResourceID.NECTAR] = 0;
@@ -154,6 +155,10 @@ export abstract class BaseBee implements IBee {
         this.genome = new Genome(config && config.genome || null, this.hasPairs);
         this.traits = this._configService.getTraits(this.genome);
         this.abilities = this._configService.getAbilities(this.traits);
+        this.abilitiesMap = this.abilities.reduce(function (map, ability) {
+            map[ability.abilityId] = ability;
+            return map;
+        }, {});
         this.name = this.beetype + this.id;
         this.workStatus = null;
     }
@@ -193,7 +198,8 @@ export abstract class BaseBee implements IBee {
         this.dead = true;
     }
     getAbility(abilityId: AbilityID): Ability {
-        return this.abilities.find(a => a.abilityId === abilityId);
+        //return this.abilities.find(a => a.abilityId === abilityId);
+        return this.abilitiesMap[abilityId];
     }
     mature(type: BeeTypes): BaseBee {
         throw new Error('Method not implemented.');
@@ -257,6 +263,9 @@ export abstract class BaseBee implements IBee {
         }
     }
     removeWaypointNode(hexagon: Hexagon): void {
+        if (this.harvesting) {
+            hexagon.mapResource.doneHarvesting();
+        }
         this.nodes.splice(this.nodes.indexOf(hexagon), 1);
         this.nodeIds.splice(this.nodeIds.indexOf(hexagon.id), 1);
     }
@@ -266,37 +275,39 @@ export abstract class BaseBee implements IBee {
     doProduce(ms: number, hive: Hive): void {
         var rate = this.getAbility(this.jobStep.rate).value;
         var ya = this.getAbility(this.jobStep.yield);
-        this.msSinceWork += ms;
-        if (this.msSinceWork >= rate) {
+        if (hive.storageSpace(ya.rid) >= ya.value) {
+            this.msSinceWork += ms;
+            if (this.msSinceWork >= rate) {
 
-            while (this.msSinceWork >= rate) {
-                var spent = [];
-                var success = false;
-                for (let c of this.jobStep.cost) {
-                    var ca = this.getAbility(c);
-                    var result = hive.changeResource(ca.c_rid, -1 * ca.value);
-                    success = result.error !== -1 && result.stored === -1 * ca.value;
-                    if (success) {
-                        spent.push({ rid: ca.c_rid, amount: ca.value });
-                    } else break;
-                }
-                if (success) {
-                    var result = hive.changeResource(ya.rid, ya.value);
-                    success = result.error !== -1 && result.stored === ya.value;
-                    if (!success) hive.changeResource(ya.rid, -1 * result.stored);
-                }
-
-                // we either didn't have enough resources, or we couldn't store the 
-                // resources, refund anything that was spent
-                if (!success) {
-                    for (let s of spent) {
-                        hive.changeResource(s.rid, s.amount);
+                while (this.msSinceWork >= rate) {
+                    var spent = [];
+                    var success = false;
+                    for (let c of this.jobStep.cost) {
+                        var ca = this.getAbility(c);
+                        var result = hive.changeResource(ca.c_rid, -1 * ca.value);
+                        success = result.error !== -1 && result.stored === -1 * ca.value;
+                        if (success) {
+                            spent.push({ rid: ca.c_rid, amount: ca.value });
+                        } else break;
                     }
-                    //no need to keep working
-                    this.msSinceWork = rate;
-                    break;
-                } else {
-                    this.msSinceWork -= rate;
+                    if (success) {
+                        var result = hive.changeResource(ya.rid, ya.value);
+                        success = result.error !== -1 && result.stored === ya.value;
+                        if (!success) hive.changeResource(ya.rid, -1 * result.stored);
+                    }
+
+                    // we either didn't have enough resources, or we couldn't store the 
+                    // resources, refund anything that was spent
+                    if (!success) {
+                        for (let s of spent) {
+                            hive.changeResource(s.rid, s.amount);
+                        }
+                        //no need to keep working
+                        this.msSinceWork = rate;
+                        break;
+                    } else {
+                        this.msSinceWork -= rate;
+                    }
                 }
             }
         }
@@ -304,7 +315,8 @@ export abstract class BaseBee implements IBee {
     }
     doTravel(ms: number, hive: Hive, map: Map): void {
         if (this.nodeIds.length === 0) {
-            this.setJob(JobID.IDLE);
+            this.tripStart = this.tripEnd;
+            this.goHome(ms, hive, map);
             return;
         }
         var mr = this.nodes[this.nodeIndex].mapResource;
@@ -330,8 +342,9 @@ export abstract class BaseBee implements IBee {
         this.workStatus = { action: "Travelling to " + this.tripEnd, value: this.tripElaspedTime / 1000, max: this.tripTotalTime / 1000, rid: rid };
     }
     doCollect(ms: number, hive: Hive, map: Map): void {
+
         if (this.nodeIds.length === 0) {
-            this.setJob(JobID.IDLE);
+            this.goHome(ms, hive, map);
             return;
         }
         if (this.waitingAtResource) {
@@ -386,9 +399,12 @@ export abstract class BaseBee implements IBee {
                 : this.storageAmount(ResourceID.WATER) > 0 && resourceNode.getAvailable(ResourceID.WATER) > 0 ? ResourceID.WATER : null;
     }
     getDepositRid(hive: Hive): ResourceID {
-        var nectar = hive.resources.find(r => r.rid === ResourceID.NECTAR);
-        var pollen = hive.resources.find(r => r.rid === ResourceID.POLLEN);
-        var water = hive.resources.find(r => r.rid === ResourceID.WATER);
+        // var nectar = hive.resources.find(r => r.rid === ResourceID.NECTAR);
+        // var pollen = hive.resources.find(r => r.rid === ResourceID.POLLEN);
+        // var water = hive.resources.find(r => r.rid === ResourceID.WATER);
+        var nectar = hive.resourcesMap[ResourceID.NECTAR];
+        var pollen = hive.resourcesMap[ResourceID.POLLEN];
+        var water = hive.resourcesMap[ResourceID.WATER];
         var deposit = this.baskets[ResourceID.NECTAR] > 0 && nectar.owned < nectar.max ? ResourceID.NECTAR
             : this.baskets[ResourceID.POLLEN] > 0 && pollen.owned < pollen.max ? ResourceID.POLLEN
                 : this.baskets[ResourceID.WATER] > 0 && water.owned < water.max ? ResourceID.WATER
@@ -446,7 +462,7 @@ export abstract class BaseBee implements IBee {
     }
     goHome(ms: number, hive: Hive, map: Map): void {
 
-
+        //console.log(this.name);
         if (this.tripStart !== this.pos) {
             this.jobStep = null;
             var rate = this.getAbility(AbilityID.SPD_FLY).value;
@@ -470,8 +486,10 @@ export abstract class BaseBee implements IBee {
                 this._logService.logWorkMessage(this.name + ' returned home.');
                 if (!this.storageEmpty())
                     this.jobStep = this.job.actions.find(a => a.action === JobAction.DEPOSIT);
-                else
-                    this.jobStep = this.job.actions.find(a => a.action === JobAction.TRAVEL);
+                else {
+                    if (this.nodeIds.length === 0) this.setJob(JobID.IDLE);
+                    else this.jobStep = this.job.actions.find(a => a.action === JobAction.TRAVEL);
+                }
             }
         }
         if (this.job.jid === JobID.IDLE)
@@ -481,6 +499,7 @@ export abstract class BaseBee implements IBee {
 
     }
     doWork(ms: number, hive: Hive, map: Map): void {
+        if (this.beetype === BeeTypes.EGG || this.beetype === BeeTypes.LARVA) return;
         if (!this.jobStep) {
             this.goHome(ms, hive, map);
             return;

@@ -1,4 +1,4 @@
-<div ng-init="$ctrl.pauseScroll=false">
+<div>
     <div class="nopadding col-xs-3">
         <div class="row topRow">
             <div class="col-xs-12 fullH">
@@ -22,9 +22,36 @@
                 <li><button class="btn btn-primary" uiSref="farm">Farm</button></li>
                 <li><button class="btn btn-primary" uiSref="achievements">Achievements</button></li>
                 <li><button class="btn btn-primary" uiSref="test">Test Interface</button></li>
+                <li><button class="btn btn-primary" (click)="showProgress()">Test Modal</button></li>
 
             </ul>
             <bloqhead-game-control class="navbar-brand navbar-right"></bloqhead-game-control>
         </div>
     </nav>
+</div>
+
+
+<div bsModal #progressModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" [config]="{backdrop:'static', keyboard:false}">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content player-content">
+            <div class="modal-header">
+                <h4 class="modal-title pull-left">Welcome back!</h4>
+            </div>
+            <div class="modal-body" [attr.data-rid]="'NONE'">
+                <p>{{modalData.offlineString}}</p>
+                <div class="progress progress-custom">
+                    <progressbar [max]="modalData.offlineMs" [value]="modalData.processedMs" [animate]="false">
+                        <span class="workers">Processing your offline progress</span>
+                        <span class="amounts">{{(modalData.processedMs/modalData.offlineMs*100)|number:'1.1-1'}} %</span>
+                    </progressbar>
+                </div><br />
+                <p>Click the button below to forfeit your remaining offline progess and get into the game.</p>
+            </div>
+            <div class="modal-footer">
+                <div class="scalable-list-button">
+                    <button class="btn btn-sm btn-primary" (click)="stopProcessing()" *ngIf="modalData.processing">Skip offline progress</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

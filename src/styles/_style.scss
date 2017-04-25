@@ -588,6 +588,7 @@ div[data-rid="NONE"] {
     overflow-x: hidden;
 }
 
+.modal-footer,
 .goal-container,
 .map-container,
 .population-container,
@@ -760,4 +761,8 @@ bloqhead-worker-list {
     -moz-transition: -moz-transform 0.2s ease-out;
     -o-transition: -o-transform 0.2s ease-out;
     -ms-transition: -ms-transform 0.2s ease-out;
+}
+
+.modal-dialog {
+    top: 60vh;
 }
