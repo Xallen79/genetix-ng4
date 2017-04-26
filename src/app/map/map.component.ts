@@ -217,7 +217,7 @@ export class MapComponent implements OnInit, OnDestroy {
   dropped(event) {
 
     var hex = this._gameService.map.grid.GetHexAt(new Point(event.nativeEvent.offsetX, event.nativeEvent.offsetY));
-    if (hex && hex.inRange && hex.mapResource)
+    if (hex && (hex.inRange || hex.inRoute) && hex.mapResource)
       this._gameService.map.getBeeById(event.dragData).addWaypointNode(hex);
 
     this._gameService.map.setRangeGraph(null);
