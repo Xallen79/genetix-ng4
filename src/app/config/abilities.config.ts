@@ -202,7 +202,7 @@ export var DEFAULT_ABILITIES: Ability[] = [{
     "abilityId": AbilityID.COST_FOOD_DEADBEES,
     "name": "%(resource)s Production Cost (%(cost)s)",
     "desc": "The amount of %(cost)s a bee needs to produce %(resource)s.",
-    "baseValue": 5,
+    "baseValue": 1,
     "rid": ResourceID.FOOD,
     "c_rid": ResourceID.DEADBEES
 },

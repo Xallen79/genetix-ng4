@@ -196,6 +196,7 @@ export abstract class BaseBee implements IBee {
 
     die(): void {
         this.dead = true;
+        this.setJob(JobID.IDLE);
     }
     getAbility(abilityId: AbilityID): Ability {
         //return this.abilities.find(a => a.abilityId === abilityId);
@@ -308,6 +309,7 @@ export abstract class BaseBee implements IBee {
                     } else {
                         this.msSinceWork -= rate;
                     }
+                    if (hive.storageSpace(ya.rid) < ya.value) break;
                 }
             }
         }
@@ -461,8 +463,6 @@ export abstract class BaseBee implements IBee {
 
     }
     goHome(ms: number, hive: Hive, map: Map): void {
-
-        //console.log(this.name);
         if (this.tripStart !== this.pos) {
             this.jobStep = null;
             var rate = this.getAbility(AbilityID.SPD_FLY).value;
@@ -499,7 +499,7 @@ export abstract class BaseBee implements IBee {
 
     }
     doWork(ms: number, hive: Hive, map: Map): void {
-        if (this.beetype === BeeTypes.EGG || this.beetype === BeeTypes.LARVA) return;
+        if (this.dead || this.beetype === BeeTypes.EGG || this.beetype === BeeTypes.LARVA) return;
         if (!this.jobStep) {
             this.goHome(ms, hive, map);
             return;

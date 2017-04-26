@@ -205,6 +205,10 @@ export class Hive implements IHive {
         }
         if (error === 0 && actualAmount !== 0) {
             this.updateBuildings();
+            if (rid === ResourceID.DEADBEES && actualAmount < 0) {
+                let index = this.bees.findIndex(b => b.dead);
+                this.bees.splice(index, 1);
+            }
         }
         return { owned: r.owned, stored: actualAmount, error: error };
 
@@ -284,10 +288,12 @@ export class Hive implements IHive {
 
         if (ms === 0)
             return;
-
+        let deadbees = 0;
         for (let bee of this.bees) {
+            if (bee.dead) deadbees++;//it takes 1 cycle for the hive to discover deadbees
             bee.doWork(ms, this, map);
         }
+        this.resourcesMap[ResourceID.DEADBEES].owned = deadbees;
     }
 
 }

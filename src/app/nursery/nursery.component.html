@@ -19,9 +19,9 @@
                 <div class="bloqhead-component">
                     <h5>
                         <div class="col-xs-12 mortal-name">
-                            <span><s class="dead" *ngIf="!isAlive(egg)">{{egg.name}}</s></span>
-                            <span *ngIf="isAlive(egg)">{{egg.name}}</span> &nbsp;
-                            <i class="fa icon-tombstone text-danger" *ngIf="!isAlive(egg)"></i><i class="fa {{trait.icon}} {{trait.style}}" *ngFor="let trait of egg.traits"></i>
+                            <span><s class="dead" *ngIf="egg.dead">{{egg.name}}</s></span>
+                            <span *ngIf="!egg.dead">{{egg.name}}</span> &nbsp;
+                            <i class="fa icon-tombstone text-danger" *ngIf="egg.dead"></i><i class="fa {{trait.icon}} {{trait.style}}" *ngFor="let trait of egg.traits"></i>
                         </div>
                     </h5>
                     <div class="row">
@@ -32,7 +32,7 @@
                             <button class="btn btn-xs btn-primary" (click)="assignBee(egg, BeeTypes.DRONE)" [disabled]="!canBreed(egg)">Make Drone</button>
                         </div>
                         <div class="scalable-list-button">
-                            <button class="btn btn-xs btn-primary" (click)="egg.die()" [disabled]="!isAlive(egg)">Consume</button>
+                            <button class="btn btn-xs btn-primary" (click)="egg.die()" [disabled]="egg.dead">Consume</button>
                         </div>
                     </div>
                 </div>
@@ -42,18 +42,20 @@
                 <div class="bloqhead-component">
                     <h5>
                         <div class="col-xs-12 mortal-name">
-                            <span>{{larva.name}}</span>&nbsp;<i class="fa icon-tombstone" *ngIf="!isAlive(larva)"></i><i class="fa {{trait.icon}} {{trait.style}}" *ngFor="let trait of larva.traits"></i>
+                            <span><s class="dead" *ngIf="larva.dead">{{larva.name}}</s></span>
+                            <span *ngIf="!larva.dead">{{larva.name}}</span> &nbsp;
+                            <i class="fa icon-tombstone text-danger" *ngIf="larva.dead"></i><i class="fa {{trait.icon}} {{trait.style}}" *ngFor="let trait of larva.traits"></i>
                         </div>
                     </h5>
                     <div class="row">
                         <div class="scalable-list-button">
-                            <button class="btn btn-xs btn-primary" (click)="assignBee(larva,BeeTypes.QUEEN)" [disabled]="!canBreed(larva)">Make Queen</button>
-                        </div>
-                        <div class="scalable-list-button">
                             <button class="btn btn-xs btn-primary" (click)="assignBee(larva,BeeTypes.WORKER)" [disabled]="!canBreed(larva)">Make Worker</button>
                         </div>
                         <div class="scalable-list-button">
-                            <button class="btn btn-xs btn-primary" (click)="larva.die()" [disabled]="!isAlive(larva)">Consume</button>
+                            <button class="btn btn-xs btn-primary" (click)="assignBee(larva,BeeTypes.QUEEN)" [disabled]="!canBreed(larva)">Make Queen</button>
+                        </div>
+                        <div class="scalable-list-button">
+                            <button class="btn btn-xs btn-primary" (click)="larva.die()" [disabled]="larva.dead">Consume</button>
                         </div>
                     </div>
                 </div>

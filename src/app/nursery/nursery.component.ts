@@ -29,15 +29,12 @@ export class NurseryComponent implements OnInit {
   }
 
   canBreed(bee: Bee.BaseBee): boolean {
-    return this.isAlive(bee);
+    let hive = this._gameService.map.currentHive;
+    return !bee.dead && hive.getPopulationCount() < hive.populationLimit;
   }
 
   canFertilize(egg: Bee.Egg): boolean {
-    return this.isAlive(egg);
-  }
-
-  isAlive(bee: Bee.BaseBee): boolean {
-    return !bee.dead;
+    return !egg.dead;
   }
 
   assignBee(bee: Bee.BaseBee, type: Bee.BeeTypes) {

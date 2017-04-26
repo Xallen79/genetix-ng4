@@ -173,16 +173,20 @@ export class Map implements IMap {
         if (beeid) {
             var bee = this.currentHive.getBeeById(beeid);
             var range = bee.getAbility('rng').value;
-
             var center = this.grid.GetHexById(this.currentHive.pos);
-            for (let target of this.grid.Hexes) {
-                target.inRange = this.grid.GetHexDistance(center, target) <= range;
-            }
             var i = 0;
             for (let node of bee.nodes) {
+                range -= this.grid.GetHexDistance(center, node);
+                center = node;
                 node.inRoute = true;
                 node.mapResource.routeIndex = ++i;
             }
+            if (range > 0) {
+                for (let target of this.grid.Hexes) {
+                    target.inRange = this.grid.GetHexDistance(center, target) <= range;
+                }
+            }
+
 
         } else {
             for (let hex of this.grid.Hexes) {
