@@ -104,7 +104,10 @@ export class Hexagon implements IHexagon {
             ctx.lineTo(p.X, p.Y);
         }
         ctx.closePath();
+
         ctx.fill();
+
+
 
         ctx.stroke();
 

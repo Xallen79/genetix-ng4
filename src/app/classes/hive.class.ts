@@ -42,7 +42,7 @@ interface IHive extends IHiveState {
 
 }
 export class Hive implements IHive {
-    resourcesMap: {};
+    resourcesMap: { [rid: string]: Resource } = {};
 
     beeStates: Bee.IBeeState[];
 
@@ -59,6 +59,7 @@ export class Hive implements IHive {
     buildings: Building[];
     nurseryLimit: number;
     populationLimit: number;
+    beesToDraw: { [key: string]: Bee.BaseBee } = {};
     private _configService: ConfigService;
     private _logService: LogService;
     constructor(state: IHiveState) {

@@ -8,7 +8,7 @@ import { GameService } from 'app/game.service';
     <div class="col-xs-12 fullH"> 
         <div class="player-content">
             <div class="log-component">
-            <pre>{{_gameService.map.getState()|json}}</pre>            
+            <pre>{{_gameService.map.getState()|json}}</pre>
             </div>            
         </div>
         <textarea style="width:100%; color:black;" rows="5" readonly ngModel={{_gameService.lastSave}}></textarea>

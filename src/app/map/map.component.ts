@@ -88,7 +88,7 @@ export class MapComponent implements OnInit, OnDestroy {
         }
         if (!this._gameService.map.beeImg)
           this._gameService.map.beeImg = this.images['bee.svg'];
-        this.draw(elapsedMs);
+        this.draw();
       });
 
     });
@@ -170,7 +170,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.needsResize = true;
   };
 
-  draw(elapsedMs: number) {
+  draw() {
     if (typeof this.canvas === 'undefined' || typeof this.context === 'undefined')
       return;
 
@@ -179,7 +179,7 @@ export class MapComponent implements OnInit, OnDestroy {
       this.resizeCanvas();
     }
 
-    this._gameService.map.drawMap(this.context, elapsedMs);
+    this._gameService.map.drawMap(this.context);
   }
 
   resizeCanvas() {

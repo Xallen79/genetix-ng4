@@ -30,15 +30,15 @@ interface IMap extends IMapState {
     mapMoved(x: number, y: number): void;
     setRangeGraph(beeid: string): void;
     handleGameLoop(elapsedMs: number): void;
-    drawMap(context: CanvasRenderingContext2D, elapsedMs: number): void;
+    drawMap(context: CanvasRenderingContext2D): void;
     addHive(position: string): Hive;
     addWaterNode(position: string): MapResource;
     addCloverNode(position: string, level: number): MapResource;
     clear(context: CanvasRenderingContext2D): void;
     drawHexes(context: CanvasRenderingContext2D): void;
     drawResources(context: CanvasRenderingContext2D): void;
-    drawHives(context: CanvasRenderingContext2D, elapsedMs: number): void;
-    drawBees(context: CanvasRenderingContext2D, hive: Hive, elapsedMs: number): void;
+    drawHives(context: CanvasRenderingContext2D): void;
+    drawBees(context: CanvasRenderingContext2D, hive: Hive): void;
 }
 
 export class Map implements IMap {
@@ -209,11 +209,11 @@ export class Map implements IMap {
             elapsedMs -= this.stepTimeMs;
         }
     }
-    drawMap(context: CanvasRenderingContext2D, elapsedMs: number) {
+    drawMap(context: CanvasRenderingContext2D) {
         this.clear(context);
         this.drawHexes(context);
         this.drawResources(context);
-        this.drawHives(context, elapsedMs);
+        this.drawHives(context);
     }
     addHive(position: string): Hive {
         var id = this.hives.length + 1;
@@ -272,7 +272,8 @@ export class Map implements IMap {
         return mr;
     }
     clear(context: CanvasRenderingContext2D): void {
-        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+        //context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+        //context.fillRect(0, 0, context.canvas.width, context.canvas.height);
     }
     drawHexes(context: CanvasRenderingContext2D): void {
         for (let hex of this.grid.Hexes) {
@@ -300,7 +301,7 @@ export class Map implements IMap {
             }
         }
     }
-    drawHives(context: CanvasRenderingContext2D, elapsedMs: number): void {
+    drawHives(context: CanvasRenderingContext2D): void {
         for (let hive of this.hives) {
             var hex = this.grid.GetHexById(hive.pos);
             var id = 'H' + hive.id;
@@ -319,13 +320,15 @@ export class Map implements IMap {
             context.textBaseline = 'middle';
             //var textWidth = ctx.measureText(this.Planet.BoundingHex.id);
             context.fillText(id, hex.MidPoint.X, hex.MidPoint.Y);
-            this.drawBees(context, hive, elapsedMs);
+            this.drawBees(context, hive);
         }
     }
-    drawBees(context: CanvasRenderingContext2D, hive: Hive, elapsedMs: number): void {
+    drawBees(context: CanvasRenderingContext2D, hive: Hive): void {
         var scale = 1.5;
         var side = this.grid.config.hexConfig.SIDE / scale;
-        for (let bee of hive.bees) {
+        //for (let bee of hive.bees) {
+        for (let id in hive.beesToDraw) {
+            var bee = hive.beesToDraw[id];
             if (bee.isMoving) {
                 var hexStart = this.grid.GetHexById(bee.tripStart);
                 var hexEnd = this.grid.GetHexById(bee.tripEnd);
@@ -348,22 +351,10 @@ export class Map implements IMap {
                 context.drawImage(this.beeImg, side / -2, side / -2, side, side);
                 context.restore();
 
-                // context.fillStyle = 'yellow';
-                // context.beginPath();
-                // context.arc(coordX, coordY, this.grid.config.hexConfig.HEIGHT * 0.2, rads - this.Q_PI, rads + this.Q_PI, true);
-                // context.closePath();
-                // context.fill();
-                // context.lineWidth = 1;
-                // context.strokeStyle = 'black';
-                // context.stroke();
-
-                // context.fillStyle = 'black';
-                // context.font = "bolder 6pt Trebuchet MS,Tahoma,Verdana,Arial,sans-serif";
-                // context.textAlign = "center";
-                // context.textBaseline = 'middle';
-                // //var textWidth = ctx.measureText(this.Planet.BoundingHex.id);
-                // context.fillText(bee.id, coordX, coordY);
-            } else bee.heading = null;
+            } else {
+                delete hive.beesToDraw[id];
+                bee.heading = null;
+            }
         }
     }
 

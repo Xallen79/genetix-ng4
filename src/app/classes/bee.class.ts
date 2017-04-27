@@ -315,6 +315,23 @@ export abstract class BaseBee implements IBee {
         }
         this.workStatus = { action: this.job.name, value: this.msSinceWork / 1000, max: rate / 1000, rid: ya.rid };
     }
+    startTrip(dest: Hexagon, hive: Hive, map: Map) {
+        this.heading = null;
+        this.isMoving = true;
+        hive.beesToDraw[this.id] = this;
+        var rate = this.getAbility(AbilityID.SPD_FLY).value;
+        this.tripStart = this.pos;
+        this.tripElaspedTime = 0;
+        this.tripEnd = dest.id;
+        this.tripTotalTime = map.grid.GetHexDistance(dest, map.grid.GetHexById(this.tripStart)) * rate;
+    }
+    endTrip(hive: Hive) {
+        this.isMoving = false;
+        delete hive.beesToDraw[this.id];
+        this.msSinceWork = 0;
+        this.tripStart = null;
+        this.pos = this.tripEnd;
+    }
     doTravel(ms: number, hive: Hive, map: Map): void {
         if (this.nodeIds.length === 0) {
             this.tripStart = this.tripEnd;
@@ -323,21 +340,12 @@ export abstract class BaseBee implements IBee {
         }
         var mr = this.nodes[this.nodeIndex].mapResource;
         if (this.tripStart !== this.pos) {
-            this.heading = null;
-            this.isMoving = true;
-            var rate = this.getAbility(this.jobStep.rate).value;
-            this.tripStart = this.pos;
-            this.tripElaspedTime = 0;
-            this.tripEnd = this.nodes[this.nodeIndex].id;
-            this.tripTotalTime = map.grid.GetHexDistance(this.nodes[this.nodeIndex], map.grid.GetHexById(this.tripStart)) * rate;
+            this.startTrip(this.nodes[this.nodeIndex], hive, map);
         }
         this.tripElaspedTime += ms;
         if (this.tripElaspedTime >= this.tripTotalTime) {
-            this.isMoving = false;
+            this.endTrip(hive);
             this.jobStep = this.job.actions.find(a => a.action === JobAction.COLLECT);
-            this.msSinceWork = 0;
-            this.tripStart = null;
-            this.pos = this.nodes[this.nodeIndex].id;
             mr.queueHarvest(this);
         }
         var rid = mr.water > 0 ? ResourceID.WATER : ResourceID.POLLEN;
@@ -465,21 +473,15 @@ export abstract class BaseBee implements IBee {
     goHome(ms: number, hive: Hive, map: Map): void {
         if (this.tripStart !== this.pos) {
             this.jobStep = null;
-            var rate = this.getAbility(AbilityID.SPD_FLY).value;
-            this.tripStart = this.pos;
-            this.tripElaspedTime = 0;
-            this.tripEnd = hive.pos;
-            this.tripTotalTime = map.grid.GetHexDistance(map.grid.GetHexById(this.tripEnd), map.grid.GetHexById(this.tripStart)) * rate;
-            this.isMoving = true;
+            this.startTrip(map.grid.GetHexById(hive.pos), hive, map);
         }
         this.tripElaspedTime += ms;
         if (this.tripElaspedTime >= this.tripTotalTime) {
-            this.isMoving = false;
+            this.endTrip(hive);
+
             //var jobType = jobTypes[this.jid];
             this.jobStep = this.job.actions[0];
-            this.msSinceWork = 0;
-            this.tripStart = null;
-            this.pos = this.tripEnd;
+
 
             //var jobStepIndex = this.jobStepIndex;
             if (this.job.jid === JobID.FORAGER) {
