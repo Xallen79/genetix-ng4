@@ -167,6 +167,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   setHexSize(size) {
     this.mapconfig = this._gameService.map.grid.setHexSizeByHeight(size);
+    this._gameService.map.redraw = true;
     this.needsResize = true;
   };
 

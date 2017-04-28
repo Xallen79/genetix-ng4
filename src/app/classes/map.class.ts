@@ -165,6 +165,7 @@ export class Map implements IMap {
             this.currentHive = hive;
             //self.sendHiveChangeEvent();
         }
+        this.redraw=true;
     }
     mapMoved(x: number, y: number): void {
         this.canvasLocation = new Point(x, y);
@@ -197,6 +198,7 @@ export class Map implements IMap {
                 resource.routeIndex = null;
             }
         }
+        this.redraw=true;
     }
     handleGameLoop(elapsedMs: number): void {
         while (elapsedMs >= this.stepTimeMs) {
@@ -208,12 +210,13 @@ export class Map implements IMap {
             }
             elapsedMs -= this.stepTimeMs;
         }
-    }
-    drawMap(context: CanvasRenderingContext2D) {
-        this.clear(context);
-        this.drawHexes(context);
-        this.drawResources(context);
-        this.drawHives(context);
+        if (this.beeCanvas) {
+
+            let ctx = this.beeCanvas.getContext("2d");
+            this.clear(ctx);
+            this.drawHives(ctx);
+
+        }
     }
     addHive(position: string): Hive {
         var id = this.hives.length + 1;
@@ -271,8 +274,37 @@ export class Map implements IMap {
         hex.mapResource = mr;
         return mr;
     }
+    //mapImage: ImageData;
+    mapCanvas: HTMLCanvasElement;
+    beeCanvas: HTMLCanvasElement;
+    redraw:boolean=true;
+    drawMap(context: CanvasRenderingContext2D) {
+        this.clear(context);
+        // this.drawHexes(context);
+        // this.drawResources(context);
+        // this.drawHives(context);
+
+        if (!this.mapCanvas || this.redraw) {
+            this.mapCanvas = document.createElement("canvas");
+            this.mapCanvas.width = context.canvas.width;
+            this.mapCanvas.height = context.canvas.height;
+            let ctx = this.mapCanvas.getContext("2d");
+            this.clear(ctx);
+            this.drawHexes(ctx);
+            this.drawResources(ctx);
+            this.beeCanvas = document.createElement("canvas");
+            this.beeCanvas.width = context.canvas.width;
+            this.beeCanvas.height = context.canvas.height;
+            ctx = this.beeCanvas.getContext("2d");
+            this.clear(ctx);
+            this.drawHives(context);
+            this.redraw=false;
+        }
+        context.drawImage(this.mapCanvas, 0, 0);
+        context.drawImage(this.beeCanvas, 0, 0);
+    }
     clear(context: CanvasRenderingContext2D): void {
-        //context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
         //context.fillRect(0, 0, context.canvas.width, context.canvas.height);
     }
     drawHexes(context: CanvasRenderingContext2D): void {
