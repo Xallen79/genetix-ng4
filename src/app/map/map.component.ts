@@ -175,6 +175,11 @@ export class MapComponent implements OnInit, OnDestroy {
     if (typeof this.canvas === 'undefined' || typeof this.context === 'undefined')
       return;
 
+    if (this._gameService.map.needsRecenter) {
+      this.resetZoom();
+      this._gameService.map.needsRecenter = false;
+    }
+
     if (this.needsResize) {
       this.needsResize = false;
       this.resizeCanvas();

@@ -52,6 +52,7 @@ export class GameService {
         } else {
             this.map = new Map(this.stepTimeMs, null);
         }
+        this.map.needsRecenter = true;
         this._msSinceAutoSave = 0;
         this._elapsedMs.next(0);
         this.offlineMs = now - this.saveTime;// + this._maxAwayMs * 144;//test 24 hours offline
