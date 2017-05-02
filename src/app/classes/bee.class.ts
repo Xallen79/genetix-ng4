@@ -267,6 +267,8 @@ export abstract class BaseBee implements IBee {
         if (this.harvesting) {
             hexagon.mapResource.doneHarvesting();
         }
+
+        hexagon.mapResource.bees.splice(hexagon.mapResource.bees.indexOf(this), 1);
         this.nodes.splice(this.nodes.indexOf(hexagon), 1);
         this.nodeIds.splice(this.nodeIds.indexOf(hexagon.id), 1);
     }
@@ -333,7 +335,10 @@ export abstract class BaseBee implements IBee {
         this.pos = this.tripEnd;
     }
     doTravel(ms: number, hive: Hive, map: Map): void {
-        if (this.nodeIds.length === 0) {
+        if (this.nodeIds.length === 0 || this.nodes.length === 0) {
+            this.nodeIds = [];
+            this.nodes = [];
+            this.nodeIndex = 0;
             this.tripStart = this.tripEnd;
             this.goHome(ms, hive, map);
             return;
@@ -353,15 +358,24 @@ export abstract class BaseBee implements IBee {
     }
     doCollect(ms: number, hive: Hive, map: Map): void {
 
-        if (this.nodeIds.length === 0) {
+        if (this.nodeIds.length === 0 || this.nodes.length === 0) {
+            this.nodeIds = [];
+            this.nodes = [];
+            this.nodeIndex = 0;
             this.goHome(ms, hive, map);
             return;
+        }
+        if (this.nodeIndex >= this.nodes.length) {
+            this.nodeIndex = this.nodes.length - 1;
+            console.log("nodeIndex out of sync! - " + this.name);
         }
         if (this.waitingAtResource) {
             this.workStatus = { action: "Waiting at resource", value: 0, max: 0 };
             return;
         }
+
         var resourceNode = this.nodes[this.nodeIndex].mapResource;
+
         var rate = this.getAbility(this.jobStep.rate).value * resourceNode.harvestMultiplier;
         this.msSinceWork += ms;
         while (this.msSinceWork >= rate) {
@@ -426,6 +440,7 @@ export abstract class BaseBee implements IBee {
     doDeposit(ms: number, hive: Hive): void {
         var rate = this.getAbility(this.jobStep.rate).value;
         this.msSinceWork += ms;
+        this.workStatus = { action: "Depositing", rid: this.getDepositRid(hive), value: this.msSinceWork / 1000, max: rate / 1000 };
         while (this.msSinceWork >= rate) {
             var deposited = false;
             var rid = ResourceID.NECTAR;
@@ -467,7 +482,7 @@ export abstract class BaseBee implements IBee {
             }
 
         }
-        this.workStatus = { action: "Depositing", rid: this.getDepositRid(hive), value: this.msSinceWork / 1000, max: rate / 1000 };
+
 
     }
     goHome(ms: number, hive: Hive, map: Map): void {
