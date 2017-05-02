@@ -1,6 +1,6 @@
-import { DEFAULT_RESOURCES, Resource, IResourceType } from 'app/config/resourceTypes.config';
+import { DEFAULT_RESOURCES, Resource } from 'app/config/resourceTypes.config';
 import { sprintf } from 'sprintf-js';
-import { ResourceID, BuildingID } from "app/config/types.config";
+import { ResourceID, BuildingID, IResourceType, INextCost } from "app/config/types.config";
 export type BuildingUse = 'housing' | 'storage' | 'nursery';
 export const BuildingUse = {
     HOUSING: 'housing' as BuildingUse,
@@ -30,10 +30,6 @@ interface IBuildingType {
     multiplier: number;
 }
 
-interface INextCost {
-    resource: IResourceType;
-    amount: number;
-};
 
 export class Building implements IBuildingType {
     bid: BuildingID;

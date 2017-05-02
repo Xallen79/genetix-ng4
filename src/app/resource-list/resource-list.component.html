@@ -6,7 +6,7 @@
         <div class="resource-list col-xs-12">
             <div class="row" *ngFor="let resource of _gameService.map.currentHive.resources" [attr.data-rid]="resource.rid" bloqheadDropTarget [enabled]="resource.jid !== 'forager'" [dropTargetId]="resource.jid" (onDrop)="dropped($event, resource.jid)">
                 <div class="col-xs-12 col-sm-3">
-                    <h5 tooltip="{{resource.desc}}" container="body" placement="right">{{resource.name}}</h5>
+                    <h5 [tooltip]="prodReqTooltip" container="body" placement="right">{{resource.name}}</h5>
                 </div>
                 <div class="col-xs-12 col-sm-9">
                     <div class="progress progress-custom" *ngIf="resource.max !== -1">
@@ -22,6 +22,32 @@
                         </progressbar>
                     </div>
                 </div>
+
+                <ng-template #prodReqTooltip>
+
+                    <div style="text-align: left;" *ngIf="getResourceRequirements(resource.jid) as req">
+                        <h5>{{resource.desc}}</h5>
+
+                        <p style="white-space:nowrap" *ngIf="req.costs">
+                            <span>Requires: </span>
+                            <span *ngFor="let cost of req.costs">                                
+                                <i class="fa" [ngClass]="cost.resource.icon" [attr.data-rid]="cost.resource.rid"></i>
+                                <!--data-attr="{{$ctrl.resourceTypes[cost.rid].attr}}"-->
+                                <span>{{cost.amount}}</span>
+                            </span>
+                        </p>
+                        <p style="white-space:nowrap" *ngIf="req.y_resource">
+                            <span>Yields: </span>
+                            <span>                                
+                                <i class="fa" [ngClass]="req.y_resource.icon" [attr.data-rid]="req.y_resource.rid"></i>
+                                <!--data-attr="{{$ctrl.resourceTypes[cost.rid].attr}}"-->
+                                <span>{{req.y_amount}}</span>
+                            </span>
+                        </p>
+                    </div>
+
+                </ng-template>
+
                 <!--<div class="col-xs-12 col-sm-9">
                     <div class="progress progress-custom" ng-if="resource.max !== -1">
                         <div class="progress-bar" role="progressbar" (aria-valuenow)="{{resource.owned}}" (aria-valuemin)="0" (aria-valuemax)="{{resource.max}}" ng-style="{width: (100*(resource.owned/resource.max)) + '%'}">

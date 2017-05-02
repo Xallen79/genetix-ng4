@@ -59,3 +59,16 @@ export const BuildingID = {
     STORAGE_HONEY: 'storage_honey' as BuildingID,
     STORAGE_FOOD: 'storage_food' as BuildingID
 }
+export interface IResourceType {
+    rid: ResourceID;
+    name: string;
+    desc: string;
+    jid: JobID;
+    icon: string;
+    owned?: number;
+    max?: number;
+}
+export interface INextCost {
+    resource: IResourceType;
+    amount: number;
+};

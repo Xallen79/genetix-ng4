@@ -4,16 +4,19 @@ import { Building, DEFAULT_BUILDINGS } from './buildingTypes.config';
 import { Resource, DEFAULT_RESOURCES } from './resourceTypes.config';
 import { Genome } from 'app/classes/genome.class';
 import { Ability, DEFAULT_ABILITIES } from "app/config/abilities.config";
-import { ResourceID } from './types.config';
+import { ResourceID, JobID, INextCost } from './types.config';
+import { JOB_TYPES, JobAction } from "app/config/jobTypes.config";
 
 @Injectable()
 export class ConfigService {
     private TRAITS: Trait[];
+    private baseResourceRequirements: { [jid: string]: any }
 
     private checked: string[];
 
     constructor() {
         this.buildTraits();
+        this.buildResourceRequirements();
         console.log(this.TRAITS);
 
     }
@@ -90,6 +93,33 @@ export class ConfigService {
     }
     getResourceById(rid: ResourceID) {
         return DEFAULT_RESOURCES.find(r => r.rid === rid);
+    }
+    buildResourceRequirements(): any {
+        this.baseResourceRequirements = JOB_TYPES.reduce(function (map, job) {
+            let costs: any = [];
+            let data: any = {};
+            let action = job.actions.find(a => a.action === JobAction.PRODUCE);
+            if (action && action.cost) {
+                for (let costAbility of action.cost) {
+                    let ability = DEFAULT_ABILITIES.find(a => a.abilityId === costAbility);
+                    costs.push({ resource: DEFAULT_RESOURCES.find(r => r.rid === ability.c_rid), amount: ability.baseValue });
+                }
+                let yieldAbility = DEFAULT_ABILITIES.find(a => a.abilityId === action.yield);
+                data.y_resource = DEFAULT_RESOURCES.find(r => r.rid === yieldAbility.rid);
+                data.y_amount = yieldAbility.baseValue;
+                data.costs = costs;
+
+                map[job.jid] = data;
+
+            }
+            else
+                map[job.jid] = {};
+
+            return map;
+        }, {});
+    }
+    getResourceCost(jid: JobID): any {
+        return this.baseResourceRequirements[jid];
     }
 
 }

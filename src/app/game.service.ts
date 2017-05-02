@@ -130,6 +130,7 @@ export class GameService {
             this._processAwayTime.next(false);
             this._processedAwayMs.next(0);
             this._logService.enabled = true;
+            this.saveTime = Date.now();
             this.saveGame();
             if (!this._animationRequest)
                 this.ngZone.run(() => {

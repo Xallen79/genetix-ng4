@@ -1,14 +1,5 @@
-import { JobID, ResourceID } from 'app/config/types.config';
+import { JobID, ResourceID, IResourceType } from 'app/config/types.config';
 
-export interface IResourceType {
-    rid: ResourceID;
-    name: string;
-    desc: string;
-    jid: JobID;
-    icon: string;
-    owned?: number;
-    max?: number;
-}
 
 
 export class Resource implements IResourceType {

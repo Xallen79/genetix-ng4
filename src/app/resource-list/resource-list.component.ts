@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { GameService } from 'app/game.service';
+import { INextCost } from "app/config/types.config";
+import { ConfigService } from "app/config/config.service";
 @Component({
     selector: 'bloqhead-resource-list',
     templateUrl: './resource-list.component.html',
@@ -7,7 +9,7 @@ import { GameService } from 'app/game.service';
 })
 export class ResourceListComponent implements OnInit {
 
-    constructor(public _gameService: GameService) { }
+    constructor(public _gameService: GameService, private _configService: ConfigService) { }
 
     ngOnInit() {
 
@@ -20,5 +22,9 @@ export class ResourceListComponent implements OnInit {
 
     getWorkerCount(jid) {
         return this._gameService.map.currentHive.bees.filter(b => b.jid === jid).length;
+    }
+
+    getResourceRequirements(jid): any {
+        return this._configService.getResourceCost(jid);
     }
 }
