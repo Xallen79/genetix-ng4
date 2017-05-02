@@ -115,6 +115,7 @@ export abstract class BaseBee implements IBee {
     baskets?: { [rid: string]: number }
     heading?: number;
     abilitiesMap: {};
+    foragingTypes: { water: boolean; nectar: boolean; pollen: boolean } = { water: false, nectar: false, pollen: false };
     private _configService: ConfigService;
     private _logService: LogService;
 
@@ -231,10 +232,19 @@ export abstract class BaseBee implements IBee {
 
     }
     storageFull(): boolean {
-        return this.storageAmount(ResourceID.NECTAR) + this.storageAmount(ResourceID.POLLEN) + this.storageAmount(ResourceID.WATER) <= 0;
+        return (
+            (this.foragingTypes.nectar ? this.storageAmount(ResourceID.NECTAR) : 0) +
+            (this.foragingTypes.pollen ? this.storageAmount(ResourceID.POLLEN) : 0) +
+            (this.foragingTypes.water ? this.storageAmount(ResourceID.WATER) : 0)
+            <= 0
+        );
     }
     storageEmpty(): boolean {
-        return this.baskets[ResourceID.NECTAR] + this.baskets[ResourceID.POLLEN] + this.baskets[ResourceID.WATER] <= 0;
+        return (
+            this.baskets[ResourceID.NECTAR] +
+            this.baskets[ResourceID.POLLEN] +
+            this.baskets[ResourceID.WATER] <= 0
+        );
     }
     setJob(jid: JobID, jobStep?: IJobStep): void {
         if (this.jid === jid) return;
@@ -253,12 +263,22 @@ export abstract class BaseBee implements IBee {
         this.nodeIndex = 0;
         this.isMoving = false;
     }
+    setForagingTypes():void{
+        this.foragingTypes = { water: false, nectar: false, pollen: false };
+        for (let node of this.nodes) {
+            this.foragingTypes.nectar = this.foragingTypes.nectar || node.mapResource.nectar > 0;
+            this.foragingTypes.pollen = this.foragingTypes.pollen || node.mapResource.pollen > 0;
+            this.foragingTypes.water = this.foragingTypes.water || node.mapResource.water > 0;
+        }
+    }
     addWaypointNode(hexagon: Hexagon): void {
         if (this.jid !== JobID.FORAGER) this.setJob(JobID.FORAGER);
 
         if (this.nodeIds.indexOf(hexagon.id) === -1) {
             this.nodes.push(hexagon);
             this.nodeIds.push(hexagon.id);
+            this.setForagingTypes();
+
         } else {
             this.removeWaypointNode(hexagon);
         }
@@ -271,6 +291,7 @@ export abstract class BaseBee implements IBee {
         hexagon.mapResource.bees.splice(hexagon.mapResource.bees.indexOf(this), 1);
         this.nodes.splice(this.nodes.indexOf(hexagon), 1);
         this.nodeIds.splice(this.nodeIds.indexOf(hexagon.id), 1);
+        this.setForagingTypes();
     }
     doSpawn(ms: number, hive: Hive) {
         throw new Error('Method not implemented.');

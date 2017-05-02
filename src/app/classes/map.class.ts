@@ -62,19 +62,22 @@ export class Map implements IMap {
         if (state) {
             this.grid = new Grid(state.gridConfig);
             this.currentHiveID = state.currentHiveID;
+            for (let mr of state.mapResourceStates) {
+                var node = new MapResource(mr);
+                this.mapResources.push(node);
+                this.grid.GetHexById(node.pos).mapResource = node;
+            }
             for (let h of state.hiveStates) {
                 var hive = new Hive(h);
                 if (this.currentHiveID === hive.id) this.currentHive = hive;
                 for (let b of hive.bees) {
                     for (let nodeid of b.nodeIds)
-                        b.nodes.push(this.grid.GetHexById(nodeid))
+                        b.nodes.push(this.grid.GetHexById(nodeid));
+                    b.setForagingTypes();
                 }
                 this.hives.push(hive);
             }
-            for (let mr of state.mapResourceStates) {
-                var node = new MapResource(mr);
-                this.mapResources.push(node);
-                this.grid.GetHexById(node.pos).mapResource = node;
+            for (let node of this.mapResources) {
                 for (let beeid of node.beeids) {
                     node.bees.push(this.getBeeById(beeid));
                 }
@@ -278,6 +281,7 @@ export class Map implements IMap {
     mapCanvas: HTMLCanvasElement;
     beeCanvas: HTMLCanvasElement;
     redraw: boolean = true;
+    needsRecenter: boolean = false;
     drawMap(context: CanvasRenderingContext2D) {
         this.clear(context);
         // this.drawHexes(context);
