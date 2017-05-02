@@ -278,6 +278,7 @@ export class Map implements IMap {
     mapCanvas: HTMLCanvasElement;
     beeCanvas: HTMLCanvasElement;
     redraw: boolean = true;
+    needsRecenter: boolean = false;
     drawMap(context: CanvasRenderingContext2D) {
         this.clear(context);
         // this.drawHexes(context);
