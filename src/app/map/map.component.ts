@@ -26,6 +26,7 @@ export class MapComponent implements OnInit, OnDestroy {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
   mouseMoved: boolean;
+  mouseDown: boolean;
   dontTranslate: boolean = false;
   needsResize: boolean = false;
   mapconfig: IGridConfig;
@@ -108,8 +109,10 @@ export class MapComponent implements OnInit, OnDestroy {
   @HostListener('mousedown', ['$event'])
   mousedown(event: MouseEvent) {
     if ((<Element>event.target).id === 'map') {
-      if (event.button === 0)
+      if (event.button === 0) {
         this.mouseMoved = false;
+        this.mouseDown = true;
+      }
 
       return false;
     }
@@ -117,8 +120,9 @@ export class MapComponent implements OnInit, OnDestroy {
 
   @HostListener('mouseup', ['$event'])
   mouseup(event: MouseEvent) {
-    if (event.button === 0 && !this.mouseMoved && (<Element>event.target).id === 'map')
+    if (this.mouseDown && event.button === 0 && !this.mouseMoved && (<Element>event.target).id === 'map')
       this._gameService.map.mapClicked(event.offsetX, event.offsetY);
+    this.mouseDown = false;
     return false;
   }
 
@@ -127,7 +131,7 @@ export class MapComponent implements OnInit, OnDestroy {
   @HostListener('mousemove', ['$event'])
   mousemove(event: MouseEvent) {
     if ((<Element>event.target).id === 'map') {
-      if (event.buttons === 1 && (Math.abs(event.movementX) > 0.1 || Math.abs(event.movementY) > 0.1)) {
+      if (this.mouseDown && event.buttons === 1 && (Math.abs(event.movementX) > 0.1 || Math.abs(event.movementY) > 0.1)) {
         this.mouseMoved = true;
         this.moveCanvasBy(event.movementX, event.movementY);
       }
