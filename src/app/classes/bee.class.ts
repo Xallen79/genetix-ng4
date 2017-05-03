@@ -10,6 +10,8 @@ import { Ability } from "app/config/abilities.config";
 import { LogService } from "app/log/log.component";
 import { JobID, AbilityID, ResourceID } from 'app/config/types.config';
 import { MapResource } from "app/classes/map-resource.class";
+import { sprintf } from 'sprintf-js';
+
 interface IWorkStatus {
     action: string;
     value: number;
@@ -33,6 +35,7 @@ export interface IBeeState {
     jid?: JobID;
     jobStep?: IJobStep;
     msSinceWork?: number;
+    msSinceDeathCheck?: number;
     nodeIndex?: number;
     beeMutationChance?: number;
     dead?: boolean;
@@ -83,6 +86,7 @@ export const BeeTypes = {
 };
 export abstract class BaseBee implements IBee {
 
+
     id: string;
     beetype: BeeTypes;
     pos?: string;
@@ -98,6 +102,7 @@ export abstract class BaseBee implements IBee {
     jid?: JobID;
     jobStep?: IJobStep;
     msSinceWork?: number;
+    msSinceDeathCheck?: number;
     nodeIndex?: number;
     beeMutationChance?: number;
     dead?: boolean;
@@ -138,6 +143,7 @@ export abstract class BaseBee implements IBee {
         this.setJob(config && config.jid || this.jid || JobID.IDLE, config && config.jobStep || this.jobStep || null);
 
         this.msSinceWork = config && config.msSinceWork || this.msSinceWork || 0;
+        this.msSinceDeathCheck = config && config.msSinceDeathCheck || this.msSinceDeathCheck || 0;
         this.dead = (config && config.dead != null) ? config.dead : this.dead != null ? this.dead : false;
         this.nodeIds = config && config.nodeIds || this.nodeIds || [];
         this.isMoving = config && config.isMoving || false;
@@ -180,6 +186,7 @@ export abstract class BaseBee implements IBee {
             jid: this.jid,
             jobStep: this.jobStep,
             msSinceWork: this.msSinceWork,
+            msSinceDeathCheck: this.msSinceDeathCheck,
             nodeIndex: this.nodeIndex,
             beeMutationChance: this.beeMutationChance,
             dead: this.dead,
@@ -196,6 +203,7 @@ export abstract class BaseBee implements IBee {
 
 
     die(): void {
+        this._logService.logGeneralMessage(sprintf("%s died", this.name));
         this.dead = true;
         this.setJob(JobID.IDLE);
     }
@@ -263,7 +271,7 @@ export abstract class BaseBee implements IBee {
         this.nodeIndex = 0;
         this.isMoving = false;
     }
-    setForagingTypes():void{
+    setForagingTypes(): void {
         this.foragingTypes = { water: false, nectar: false, pollen: false };
         for (let node of this.nodes) {
             this.foragingTypes.nectar = this.foragingTypes.nectar || node.mapResource.nectar > 0;
@@ -536,8 +544,22 @@ export abstract class BaseBee implements IBee {
             this.workStatus = { action: "Going Home", value: this.tripElaspedTime / 1000, max: this.tripTotalTime / 1000 };
 
     }
+    checkDeath(ms: number, hive: Hive) {
+        // normal situation 1 in 10,000 chance per second
+        this.msSinceDeathCheck += ms;
+        while (this.msSinceDeathCheck > 1000) {
+            var hiveDef = hive.resourcesMap[ResourceID.DEFENSE].owned;
+            var deathRoll = randomIntFromInterval(0, 10000 + hiveDef);
+            var mortRate = this.getAbility(AbilityID.MORT_RATE).value;
+            if (deathRoll < mortRate) this.die();
+            this.msSinceDeathCheck -= 1000;
+        }
+
+    }
     doWork(ms: number, hive: Hive, map: Map): void {
-        if (this.dead || this.beetype === BeeTypes.EGG || this.beetype === BeeTypes.LARVA) return;
+        if (this.dead || this.beetype === BeeTypes.EGG || this.beetype === BeeTypes.LARVA)
+            return;
+        this.checkDeath(ms, hive);
         if (!this.jobStep) {
             this.goHome(ms, hive, map);
             return;

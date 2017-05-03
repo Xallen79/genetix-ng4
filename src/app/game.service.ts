@@ -122,7 +122,7 @@ export class GameService {
                 });
             }
             else this._processedAwayMs.next(nextTime);
-            this.map.handleGameLoop(procTime);
+            this.map.handleGameLoop(procTime, true);
             this.lastTime++;
             if (!this._animationRequest)
                 this._animationRequest = window.requestAnimationFrame(this.processOfflineTime.bind(this));

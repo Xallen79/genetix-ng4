@@ -212,6 +212,12 @@ export var DEFAULT_ABILITIES: Ability[] = [{
     "name": "Egg Production",
     "desc": "The rate at which a bee can produce eggs.",
     "baseValue": 30000
+},
+{
+    "abilityId": AbilityID.MORT_RATE,
+    "name": "Mortality rate",
+    "desc": "Odds out of base 1,000,000 that a bee will die per work cycle.",
+    "baseValue": 1
 }
 
 ]

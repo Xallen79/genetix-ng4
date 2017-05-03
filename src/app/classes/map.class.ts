@@ -203,7 +203,7 @@ export class Map implements IMap {
         }
         this.redraw = true;
     }
-    handleGameLoop(elapsedMs: number): void {
+    handleGameLoop(elapsedMs: number, skipDraw?: boolean): void {
         while (elapsedMs >= this.stepTimeMs) {
             for (let mapResource of this.mapResources) {
                 mapResource.processElapsedTime(this.stepTimeMs);
@@ -213,7 +213,7 @@ export class Map implements IMap {
             }
             elapsedMs -= this.stepTimeMs;
         }
-        if (this.beeCanvas) {
+        if (!skipDraw && this.beeCanvas) {
 
             let ctx = this.beeCanvas.getContext("2d");
             this.clear(ctx);
